@@ -19,6 +19,11 @@ const CheckoutPage: React.FC = () => {
     const [tempAddress, setTempAddress] = useState('');
     const [addressSaving, setAddressSaving] = useState(false);
 
+    // Payment Sub-options
+    const [needsChange, setNeedsChange] = useState(false);
+    const [changeFor, setChangeFor] = useState('');
+    const [cardType, setCardType] = useState('credit'); // credit, debit, voucher
+
     useEffect(() => {
         if (cartItems.length === 0) {
             navigate('/menu');
@@ -61,9 +66,22 @@ const CheckoutPage: React.FC = () => {
             return;
         }
 
+        if (paymentMethod === 'cash' && needsChange && !changeFor) {
+            alert('Por favor, informe o valor para o troco.');
+            return;
+        }
+
         setLoading(true);
         try {
             const orderId = Math.random().toString(36).substring(7).toUpperCase();
+
+            // Prepare payment details
+            const paymentDetails: any = {};
+            if (paymentMethod === 'cash' && needsChange) {
+                paymentDetails.change_for = changeFor;
+            } else if (paymentMethod === 'card') {
+                paymentDetails.card_type = cardType;
+            }
 
             // Create order in Supabase
             const { data: orderData, error: orderError } = await supabase
@@ -73,6 +91,7 @@ const CheckoutPage: React.FC = () => {
                     total_amount: subtotal,
                     status: 'pending',
                     payment_method: paymentMethod,
+                    payment_details: paymentDetails,
                     delivery_address: address,
                     id: orderId
                 })
@@ -92,12 +111,23 @@ const CheckoutPage: React.FC = () => {
             const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
             if (itemsError) throw itemsError;
 
+            // Payment text for WhatsApp
+            let paymentText = paymentMethod.toUpperCase();
+            if (paymentMethod === 'cash' && needsChange) {
+                paymentText += ` (Troco para ${formatPrice(Number(changeFor))})`;
+            } else if (paymentMethod === 'card') {
+                const cardLabels: any = { credit: 'Crédito', debit: 'Débito', voucher: 'Alimentação' };
+                paymentText += ` (${cardLabels[cardType]})`;
+            } else if (paymentMethod === 'pix') {
+                paymentText += ` (Aguardando comprovante)`;
+            }
+
             // Generate WhatsApp Message
             const message = `*🦍 NOVO PEDIDO - GORILÃO LANCHES*%0A%0A` +
                 `*Pedido:* #${orderId}%0A` +
                 `*Cliente:* ${user?.email}%0A` +
                 `*Endereço:* ${address}%0A` +
-                `*Pagamento:* ${paymentMethod.toUpperCase()}%0A%0A` +
+                `*Pagamento:* ${paymentText}%0A%0A` +
                 `*ÍTENS:*%0A` +
                 cartItems.map(item => `- ${item.quantity}x ${item.name} (${formatPrice(item.price)})`).join('%0A') +
                 `%0A%0A*TOTAL: ${formatPrice(subtotal)}*`;
@@ -166,7 +196,7 @@ const CheckoutPage: React.FC = () => {
                             </span>
                             <h2 className="text-xl font-black italic uppercase tracking-tighter">2. Forma de Pagamento</h2>
                         </div>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-3 gap-2 mb-6">
                             {[
                                 { id: 'pix', name: 'PIX', icon: 'qr_code_2' },
                                 { id: 'card', name: 'Cartão', icon: 'credit_card' },
@@ -175,12 +205,85 @@ const CheckoutPage: React.FC = () => {
                                 <button
                                     key={method.id}
                                     onClick={() => setPaymentMethod(method.id)}
-                                    className={`flex flex-col items-center justify-center gap-2 p-5 rounded-[24px] border-2 transition-all ${paymentMethod === method.id ? 'border-primary bg-primary/10 text-white shadow-lg shadow-primary/10' : 'border-border-dark bg-background-dark/50 text-gray-500'}`}
+                                    className={`flex flex-col items-center justify-center gap-2 p-4 rounded-[20px] border-2 transition-all ${paymentMethod === method.id ? 'border-primary bg-primary/10 text-white shadow-lg shadow-primary/10' : 'border-border-dark bg-background-dark/50 text-gray-500'}`}
                                 >
-                                    <Icon name={method.icon} className="text-2xl" />
-                                    <span className="text-xs font-black uppercase tracking-widest">{method.name}</span>
+                                    <Icon name={method.icon} className="text-xl" />
+                                    <span className="text-[10px] font-black uppercase tracking-widest">{method.name}</span>
                                 </button>
                             ))}
+                        </div>
+
+                        {/* Payment Sub-options */}
+                        <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                            {paymentMethod === 'pix' && (
+                                <div className="bg-background-dark/50 border border-border-dark rounded-2xl p-4 flex flex-col gap-3">
+                                    <div className="flex items-center gap-3 text-primary">
+                                        <Icon name="info" />
+                                        <span className="text-xs font-black uppercase tracking-wider">Pagamento via PIX</span>
+                                    </div>
+                                    <div className="p-3 bg-surface-dark rounded-xl border border-border-dark select-all">
+                                        <p className="text-[10px] text-gray-500 font-bold uppercase mb-1">Copia e Cola / Chave</p>
+                                        <p className="text-sm font-mono font-bold text-white">16991122177</p>
+                                    </div>
+                                    <p className="text-[10px] text-gray-400 leading-relaxed font-medium">
+                                        ⚠️ <span className="text-primary font-bold">Importante:</span> Após o pagamento, você será redirecionado ao WhatsApp. Por favor, <span className="text-white font-bold">envie o comprovante</span> para iniciarmos seu pedido.
+                                    </p>
+                                </div>
+                            )}
+
+                            {paymentMethod === 'card' && (
+                                <div className="flex flex-col gap-3">
+                                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest px-1">Selecione o tipo de cartão</p>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        {[
+                                            { id: 'credit', name: 'Crédito' },
+                                            { id: 'debit', name: 'Débito' },
+                                            { id: 'voucher', name: 'Alimentação' }
+                                        ].map(type => (
+                                            <button
+                                                key={type.id}
+                                                onClick={() => setCardType(type.id)}
+                                                className={`py-3 px-1 rounded-xl border-2 text-[10px] font-black uppercase tracking-tighter transition-all ${cardType === type.id ? 'border-primary bg-primary text-white' : 'border-border-dark bg-background-dark/50 text-gray-400'}`}
+                                            >
+                                                {type.name}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {paymentMethod === 'cash' && (
+                                <div className="flex flex-col gap-4">
+                                    <button
+                                        onClick={() => setNeedsChange(!needsChange)}
+                                        className="flex items-center justify-between p-4 bg-background-dark/50 border border-border-dark rounded-2xl"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className={`size-5 rounded-md border-2 flex items-center justify-center transition-all ${needsChange ? 'bg-primary border-primary' : 'border-gray-600'}`}>
+                                                {needsChange && <Icon name="check" className="text-[14px] text-white" />}
+                                            </div>
+                                            <span className="text-sm font-bold">Precisa de troco?</span>
+                                        </div>
+                                        <Icon name="payments" className={needsChange ? 'text-primary' : 'text-gray-600'} />
+                                    </button>
+
+                                    {needsChange && (
+                                        <div className="flex flex-col gap-2 animate-in fade-in slide-in-from-top-2">
+                                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest px-1">Troco para quanto?</p>
+                                            <div className="relative">
+                                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-primary font-black">R$</span>
+                                                <input
+                                                    type="number"
+                                                    value={changeFor}
+                                                    onChange={e => setChangeFor(e.target.value)}
+                                                    className="w-full bg-background-dark border border-border-dark rounded-xl py-4 pl-12 pr-4 text-white font-black outline-none focus:border-primary transition-all"
+                                                    placeholder="Ex: 50"
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     </section>
 
@@ -201,9 +304,10 @@ const CheckoutPage: React.FC = () => {
                             {loading ? (
                                 <div className="size-6 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
                             ) : (
-                                <>Confirmar no WhatsApp <Icon name="bolt" /></>
+                                <>Finalizar Pedido <Icon name="shopping_cart_checkout" /></>
                             )}
                         </button>
+                        <p className="text-[10px] text-gray-500 text-center font-bold uppercase tracking-widest">Você será levado ao WhatsApp oficial</p>
                     </div>
                 </div>
             </main>
