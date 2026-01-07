@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react'; // v1.1.0-payment-fix
 import { useNavigate, Link } from 'react-router-dom';
 import Icon from '../components/Icon';
 import { useCart } from '../contexts/CartContext';
