@@ -19,8 +19,6 @@ const DashboardPage: React.FC = () => {
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
 
-    const navLinkClasses = "flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 dark:text-[#b99d9f] group transition-all";
-    const activeNavLinkClasses = "bg-primary shadow-lg shadow-primary/20 text-white dark:text-white";
 
     useEffect(() => {
         const fetchOrders = async () => {

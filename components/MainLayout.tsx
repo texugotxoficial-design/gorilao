@@ -16,7 +16,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     <div className="size-8 flex items-center justify-center bg-primary rounded-lg text-white">
                         <Icon name="lunch_dining" className="text-xl" />
                     </div>
-                    <h1 className="text-lg font-black tracking-tighter">Gorilão Mobile v2</h1>
+                    <h1 className="text-lg font-black tracking-tighter">Gorilão</h1>
                 </Link>
                 <div className="flex items-center gap-2">
                     <Link to="/contact" className="p-2 text-gray-400 hover:text-white">
