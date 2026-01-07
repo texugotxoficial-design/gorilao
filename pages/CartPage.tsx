@@ -14,9 +14,9 @@ const CartPage: React.FC = () => {
 
     return (
         <div className="flex flex-col gap-6 p-4 bg-background-dark pb-24">
-            <div className="flex flex-col gap-2">
-                <h1 className="text-3xl font-black italic tracking-tighter uppercase">Meu Carrinho</h1>
-                <p className="text-gray-400 text-sm">Revise seus itens antes de finalizar o pedido!</p>
+            <div className="flex flex-col gap-2 text-center">
+                <h1 className="text-3xl font-black leading-tight tracking-tight md:text-4xl italic">Seu Carrinho</h1>
+                <p className="text-gray-400 text-lg">Revise seus itens deliciosos antes de marcar o golaço!</p>
             </div>
 
             {cartItems.length === 0 ? (

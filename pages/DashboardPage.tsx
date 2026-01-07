@@ -58,7 +58,7 @@ const DashboardPage: React.FC = () => {
 
     return (
         <div className="flex flex-col gap-6 p-4 bg-background-dark pb-24">
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 text-center">
                 <h1 className="text-3xl font-black italic tracking-tighter uppercase">Meus Pedidos</h1>
                 <p className="text-gray-400 text-sm">Acompanhe seus golaços no Gorilão! 🦍🔥</p>
             </div>
