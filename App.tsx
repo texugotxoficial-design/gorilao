@@ -19,6 +19,7 @@ import AdminRoute from './components/AdminRoute';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import MainLayout from './components/MainLayout';
 
 const App: React.FC = () => {
     return (
@@ -31,31 +32,31 @@ const App: React.FC = () => {
 
                         <Route path="/home" element={
                             <ProtectedRoute>
-                                <HomePage />
+                                <MainLayout><HomePage /></MainLayout>
                             </ProtectedRoute>
                         } />
                         <Route path="/dashboard" element={
                             <ProtectedRoute>
-                                <DashboardPage />
+                                <MainLayout><DashboardPage /></MainLayout>
                             </ProtectedRoute>
                         } />
                         <Route path="/profile" element={
                             <ProtectedRoute>
-                                <ProfilePage />
+                                <MainLayout><ProfilePage /></MainLayout>
                             </ProtectedRoute>
                         } />
                         <Route path="/menu" element={
                             <ProtectedRoute>
-                                <MenuPage />
+                                <MainLayout><MenuPage /></MainLayout>
                             </ProtectedRoute>
                         } />
                         <Route path="/cart" element={
                             <ProtectedRoute>
-                                <CartPage />
+                                <MainLayout><CartPage /></MainLayout>
                             </ProtectedRoute>
                         } />
-                        <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
-                        <Route path="/contact" element={<ContactPage />} />
+                        <Route path="/checkout" element={<ProtectedRoute><MainLayout><CheckoutPage /></MainLayout></ProtectedRoute>} />
+                        <Route path="/contact" element={<MainLayout><ContactPage /></MainLayout>} />
 
                         {/* Admin Routes */}
                         <Route path="/admin/*" element={

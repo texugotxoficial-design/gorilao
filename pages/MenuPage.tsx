@@ -98,109 +98,75 @@ const MenuPage: React.FC = () => {
     };
 
     return (
-        <div className="bg-background-dark text-white font-display">
-            <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden">
-                <header className="sticky top-0 z-50 flex items-center justify-between border-b border-border-dark bg-background-dark/95 backdrop-blur-md px-4 py-3 md:px-10">
-                    <Link to="/home" className="flex items-center gap-3 text-primary group">
-                        <div className="size-10 flex items-center justify-center bg-primary rounded-lg text-white">
-                            <Icon name="lunch_dining" className="text-2xl" />
+        <div className="flex flex-col min-h-screen bg-background-dark pb-10">
+            {/* Sticky Category Bar - Mobile Optimized */}
+            <div className="sticky top-[60px] lg:top-[64px] z-[80] bg-background-dark/95 backdrop-blur-md border-b border-border-dark py-3 px-4 overflow-x-auto no-scrollbar flex items-center gap-2">
+                <button
+                    onClick={() => setSelectedCategory(null)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl whitespace-nowrap font-bold text-xs transition-all ${selectedCategory === null ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-surface-dark text-gray-400'}`}
+                >
+                    <Icon name="grid_view" className="text-base" />
+                    Todos
+                </button>
+                {categories.map(cat => (
+                    <button
+                        key={cat.id}
+                        onClick={() => setSelectedCategory(cat.id)}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-xl whitespace-nowrap font-bold text-xs transition-all ${selectedCategory === cat.id ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-surface-dark text-gray-400'}`}
+                    >
+                        <Icon name={cat.icon || 'star'} className="text-base" />
+                        {cat.name}
+                    </button>
+                ))}
+            </div>
+
+            {/* Content Area */}
+            <main className="flex-1 px-4 py-4 max-w-5xl mx-auto w-full">
+                {/* Search Bar - Visible on Mobile */}
+                <div className="mb-6 lg:hidden">
+                    <div className="relative w-full">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+                            <Icon name="search" className="text-lg" />
                         </div>
-                        <h2 className="text-white text-xl md:text-2xl font-black leading-tight tracking-[-0.015em]">Gorilão</h2>
-                    </Link>
-
-                    <div className="hidden md:flex flex-1 justify-center max-w-xl mx-8">
-                        <div className="relative w-full">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-secondary">
-                                <Icon name="search" className="text-[20px]" />
-                            </div>
-                            <input
-                                className="block w-full pl-10 pr-3 py-2 border-none rounded-xl bg-surface-dark text-white placeholder-text-secondary focus:ring-2 focus:ring-primary text-sm sm:text-base transition-all"
-                                placeholder="Buscar no cardápio..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
-                        </div>
+                        <input
+                            className="block w-full pl-10 pr-4 py-3 bg-surface-dark border-none rounded-2xl text-white placeholder-gray-500 focus:ring-2 focus:ring-primary text-sm shadow-xl"
+                            placeholder="O que você quer comer hoje?"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
                     </div>
+                </div>
 
-                    <div className="flex items-center gap-4">
-                        <Link to="/cart" className="flex items-center justify-center rounded-lg h-10 w-10 bg-surface-dark text-white hover:bg-primary transition-colors relative">
-                            <Icon name="shopping_cart" className="text-[20px]" />
-                            {cartItems.length > 0 && (
-                                <span className="absolute -top-1 -right-1 bg-primary text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">
-                                    {cartItems.reduce((acc, item) => acc + item.quantity, 0)}
-                                </span>
-                            )}
-                        </Link>
-                        <Link to="/dashboard" className="hidden md:flex items-center justify-center rounded-lg h-10 w-10 bg-surface-dark text-white hover:bg-primary transition-colors">
-                            <Icon name="receipt_long" className="text-[20px]" />
-                        </Link>
-                        <Link to="/profile" className="hidden md:flex items-center justify-center rounded-lg h-10 w-10 bg-surface-dark text-white hover:bg-primary transition-colors">
-                            <Icon name="person" className="text-[20px]" />
-                        </Link>
-                        <button className="md:hidden text-white">
-                            <Icon name="menu" className="text-[24px]" />
-                        </button>
-                    </div>
-                </header>
-
-                <main className="flex-1 w-full max-w-[1280px] mx-auto px-4 md:px-10 py-6">
-                    {/* Categories Filter */}
-                    <div className="flex items-center gap-3 overflow-x-auto pb-6 no-scrollbar">
-                        <button
-                            onClick={() => setSelectedCategory(null)}
-                            className={`flex items-center gap-2 px-5 py-2.5 rounded-full whitespace-nowrap font-bold text-sm transition-all ${selectedCategory === null ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-surface-dark text-gray-400 hover:bg-border-dark hover:text-white'}`}
-                        >
-                            <Icon name="grid_view" className="text-[18px]" />
-                            Todos
-                        </button>
-                        {categories.map(cat => (
-                            <button
-                                key={cat.id}
-                                onClick={() => setSelectedCategory(cat.id)}
-                                className={`flex items-center gap-2 px-5 py-2.5 rounded-full whitespace-nowrap font-bold text-sm transition-all ${selectedCategory === cat.id ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-surface-dark text-gray-400 hover:bg-border-dark hover:text-white'}`}
-                            >
-                                <Icon name={cat.icon || 'star'} className="text-[18px]" />
-                                {cat.name}
-                            </button>
+                {loading ? (
+                    <div className="grid grid-cols-1 gap-4">
+                        {[1, 2, 3, 4].map(i => (
+                            <div key={i} className="h-32 bg-surface-dark rounded-2xl animate-pulse"></div>
                         ))}
                     </div>
-
-                    {loading ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
-                            {[1, 2, 3, 4, 5, 6].map(i => (
-                                <div key={i} className="h-48 bg-surface-dark rounded-2xl"></div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {filteredProducts.map(product => (
-                                <div key={product.id} className="group bg-surface-dark rounded-2xl overflow-hidden border border-border-dark hover:border-primary/30 transition-all hover:shadow-2xl hover:shadow-primary/5">
-                                    <div className="relative h-48 overflow-hidden">
-                                        <img src={product.image_url} alt={product.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                                        <div className="absolute top-3 right-3 flex flex-col gap-2">
-                                            {product.is_featured && (
-                                                <div className="bg-yellow-500 text-black text-[10px] font-black px-2 py-1 rounded-md uppercase tracking-tighter flex items-center gap-1 shadow-lg">
-                                                    <Icon name="star" className="text-[12px]" /> Destaque
-                                                </div>
-                                            )}
-                                            <button className="bg-black/50 backdrop-blur-md text-white p-2 rounded-full hover:bg-primary transition-colors">
-                                                <Icon name="favorite" className="text-[20px]" />
-                                            </button>
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {filteredProducts.map(product => (
+                            <div key={product.id} className="bg-surface-dark rounded-[24px] border border-border-dark overflow-hidden flex flex-row h-32 hover:border-primary/30 transition-all active:scale-[0.98] group shadow-lg">
+                                <div className="w-32 h-full relative overflow-hidden shrink-0">
+                                    <img src={product.image_url} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                    {product.is_featured && (
+                                        <div className="absolute top-0 left-0 bg-yellow-500 text-black text-[8px] font-black px-2 py-0.5 rounded-br-lg uppercase tracking-tighter">
+                                            Destaque
                                         </div>
+                                    )}
+                                </div>
+                                <div className="flex-grow p-3 flex flex-col justify-between overflow-hidden">
+                                    <div>
+                                        <h3 className="font-bold text-sm leading-none truncate mb-1">{product.name}</h3>
+                                        <p className="text-gray-400 text-[10px] line-clamp-2 leading-tight">{product.description}</p>
                                     </div>
-                                    <div className="p-5 flex flex-col gap-3">
-                                        <div className="flex justify-between items-start">
-                                            <h3 className="font-bold text-lg leading-tight group-hover:text-primary transition-colors">{product.name}</h3>
-                                            <span className="font-black text-primary text-lg">{formatPrice(product.price)}</span>
-                                        </div>
-                                        <p className="text-gray-400 text-sm line-clamp-2 min-h-10">{product.description}</p>
+                                    <div className="flex items-center justify-between">
+                                        <span className="font-black text-primary text-base">{formatPrice(product.price)}</span>
                                         <button
                                             onClick={() => {
                                                 const productCategory = categories.find(c => c.id === product.category_id);
                                                 const categoryName = productCategory?.name.toLowerCase() || '';
                                                 const categorySlug = productCategory?.slug.toLowerCase() || '';
-
-                                                // Bypass modal for drinks or if no extras exist for this category
                                                 const isDrink = categoryName.includes('bebida') || categorySlug.includes('bebida') || categorySlug.includes('drink');
                                                 const hasExtras = extras.some(e => e.category === productCategory?.slug);
 
@@ -210,100 +176,110 @@ const MenuPage: React.FC = () => {
                                                     setSelectedProduct(product);
                                                 }
                                             }}
-                                            className="mt-2 w-full flex items-center justify-center gap-2 rounded-xl h-12 bg-border-dark hover:bg-primary text-white font-bold transition-all transform active:scale-95 border border-primary/10"
+                                            className="bg-primary text-white p-2 rounded-xl shadow-lg shadow-primary/20"
                                         >
-                                            <Icon name="add" className="text-[20px]" />
-                                            Adicionar
+                                            <Icon name="add" className="text-xl" />
                                         </button>
                                     </div>
                                 </div>
-                            ))}
-                        </div>
-                    )}
-
-                    {!loading && filteredProducts.length === 0 && (
-                        <div className="flex flex-col items-center justify-center py-20 text-center">
-                            <div className="size-20 bg-surface-dark rounded-full flex items-center justify-center text-gray-500 mb-4">
-                                <Icon name="search_off" className="text-4xl" />
                             </div>
-                            <h3 className="text-xl font-bold mb-2">Nenhum produto encontrado</h3>
-                            <p className="text-gray-400">Tente ajustar sua busca ou filtro.</p>
-                        </div>
-                    )}
-                </main>
-
-                {/* Product/Extras Modal */}
-                {selectedProduct && (
-                    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-                        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setSelectedProduct(null)}></div>
-                        <div className="relative bg-surface-dark w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl animate-in zoom-in duration-200">
-                            <div className="relative h-40">
-                                <img src={selectedProduct.image_url} alt={selectedProduct.name} className="w-full h-full object-cover" />
-                                <button onClick={() => setSelectedProduct(null)} className="absolute top-3 right-3 bg-black/50 text-white p-2 rounded-full hover:bg-red-500 transition-colors">
-                                    <Icon name="close" />
-                                </button>
-                            </div>
-                            <div className="p-6 flex flex-col gap-6">
-                                <div>
-                                    <h2 className="text-2xl font-black mb-1">{selectedProduct.name}</h2>
-                                    <p className="text-gray-400 text-sm">{selectedProduct.description}</p>
-                                </div>
-
-                                <div className="flex flex-col gap-3">
-                                    <h3 className="font-bold text-primary flex items-center gap-2">
-                                        <Icon name="add_circle" className="text-[18px]" />
-                                        Turbine seu pedido (Opcional)
-                                    </h3>
-                                    <div className="grid grid-cols-1 gap-2">
-                                        {extras
-                                            .filter(extra => {
-                                                const productCategory = categories.find(c => c.id === selectedProduct.category_id);
-                                                return extra.category === productCategory?.slug;
-                                            })
-                                            .map(extra => (
-                                                <button
-                                                    key={extra.id}
-                                                    onClick={() => toggleExtra(extra.id)}
-                                                    className={`flex items-center justify-between p-3 rounded-xl border transition-all ${selectedExtras.includes(extra.id) ? 'bg-primary/10 border-primary text-white' : 'bg-background-dark/50 border-border-dark text-gray-400 hover:border-gray-600'}`}
-                                                >
-                                                    <div className="flex items-center gap-3">
-                                                        <div className={`size-5 rounded flex items-center justify-center border ${selectedExtras.includes(extra.id) ? 'bg-primary border-primary text-white' : 'border-gray-600'}`}>
-                                                            {selectedExtras.includes(extra.id) && <Icon name="check" className="text-[14px]" />}
-                                                        </div>
-                                                        <span className="font-medium">{extra.name}</span>
-                                                    </div>
-                                                    <span className="font-bold text-sm">+{formatPrice(extra.price)}</span>
-                                                </button>
-                                            ))}
-                                    </div>
-                                </div>
-
-                                <button
-                                    onClick={() => handleAddToCart(selectedProduct)}
-                                    className="w-full flex items-center justify-center gap-3 rounded-xl h-14 bg-primary hover:bg-red-700 text-white font-black text-lg shadow-xl shadow-primary/20 transition-all active:scale-95"
-                                >
-                                    Confirmar {formatPrice(selectedProduct.price + extras.filter(e => selectedExtras.includes(e.id)).reduce((acc, curr) => acc + Number(curr.price), 0))}
-                                </button>
-                            </div>
-                        </div>
+                        ))}
                     </div>
                 )}
 
-                {/* Floating Cart Placeholder */}
-                {cartItems.length > 0 && (
-                    <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-10 duration-500">
-                        <Link to="/cart" className="flex items-center gap-4 bg-primary text-white rounded-full pl-6 pr-2 py-2 shadow-[0_10px_40px_rgba(212,17,33,0.4)] hover:scale-105 transition-all group">
-                            <div className="flex flex-col items-start leading-tight">
-                                <span className="text-[10px] font-bold uppercase tracking-wider opacity-70">Meu Carrinho</span>
+                {/* Empty State */}
+                {!loading && filteredProducts.length === 0 && (
+                    <div className="flex flex-col items-center justify-center py-20 text-center">
+                        <Icon name="search_off" className="text-5xl text-gray-600 mb-4" />
+                        <h3 className="font-bold text-lg mb-1">Nada encontrado</h3>
+                        <p className="text-gray-500 text-sm">Tente outro filtro ou busca.</p>
+                    </div>
+                )}
+            </main>
+
+            {/* Extras Sheet (Modal) */}
+            {selectedProduct && (
+                <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setSelectedProduct(null)}></div>
+                    <div className="relative bg-surface-dark w-full max-w-lg rounded-t-[32px] sm:rounded-3xl overflow-hidden shadow-2xl animate-in slide-in-from-bottom duration-300">
+                        <div className="p-1 text-center sm:hidden">
+                            <div className="w-12 h-1 bg-gray-600 rounded-full mx-auto my-2"></div>
+                        </div>
+                        <div className="h-40 relative">
+                            <img src={selectedProduct.image_url} alt={selectedProduct.name} className="w-full h-full object-cover" />
+                            <button onClick={() => setSelectedProduct(null)} className="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full">
+                                <Icon name="close" />
+                            </button>
+                        </div>
+                        <div className="p-6 flex flex-col gap-6 max-h-[70vh] overflow-y-auto">
+                            <div>
+                                <h2 className="text-2xl font-black italic">{selectedProduct.name}</h2>
+                                <p className="text-gray-400 text-sm">{selectedProduct.description}</p>
+                            </div>
+
+                            <div className="flex flex-col gap-3 pb-20">
+                                <h3 className="font-bold text-primary flex items-center gap-2 text-sm uppercase tracking-widest">
+                                    <Icon name="add_circle" className="text-lg" />
+                                    Adicionais
+                                </h3>
+                                <div className="grid grid-cols-1 gap-2">
+                                    {extras
+                                        .filter(extra => {
+                                            const productCategory = categories.find(c => c.id === selectedProduct.category_id);
+                                            return extra.category === productCategory?.slug;
+                                        })
+                                        .map(extra => (
+                                            <button
+                                                key={extra.id}
+                                                onClick={() => toggleExtra(extra.id)}
+                                                className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${selectedExtras.includes(extra.id) ? 'bg-primary/10 border-primary text-white' : 'bg-background-dark/50 border-border-dark text-gray-400'}`}
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <div className={`size-6 rounded-lg flex items-center justify-center border ${selectedExtras.includes(extra.id) ? 'bg-primary border-primary text-white' : 'border-gray-600'}`}>
+                                                        {selectedExtras.includes(extra.id) && <Icon name="check" className="text-base" />}
+                                                    </div>
+                                                    <span className="font-bold text-sm tracking-tight">{extra.name}</span>
+                                                </div>
+                                                <span className="font-black text-xs">+{formatPrice(extra.price)}</span>
+                                            </button>
+                                        ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Sticky Action Button at bottom of modal */}
+                        <div className="absolute bottom-0 left-0 right-0 p-4 bg-surface-dark/95 backdrop-blur-md border-t border-border-dark">
+                            <button
+                                onClick={() => handleAddToCart(selectedProduct)}
+                                className="w-full flex items-center justify-between px-6 rounded-2xl h-14 bg-primary text-white font-black text-lg shadow-xl shadow-primary/20 transition-all active:scale-95"
+                            >
+                                <span>Adicionar</span>
+                                <span>{formatPrice(selectedProduct.price + extras.filter(e => selectedExtras.includes(e.id)).reduce((acc, curr) => acc + Number(curr.price), 0))}</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Floating Cart (Smaller on mobile) */}
+            {cartItems.length > 0 && !selectedProduct && (
+                <div className="fixed bottom-20 left-4 right-4 z-[90] animate-in slide-in-from-bottom-5 duration-500 lg:bottom-10 lg:left-auto lg:right-10">
+                    <Link to="/cart" className="flex items-center justify-between bg-primary text-white rounded-2xl px-6 py-4 shadow-2xl shadow-primary/30 h-16">
+                        <div className="flex items-center gap-3">
+                            <div className="bg-white/20 p-2 rounded-xl">
+                                <Icon name="shopping_cart" />
+                            </div>
+                            <div className="flex flex-col leading-none">
+                                <span className="text-[10px] font-bold uppercase tracking-wider opacity-80">{cartItems.length} {cartItems.length === 1 ? 'item' : 'itens'}</span>
                                 <span className="text-lg font-black">{formatPrice(subtotal)}</span>
                             </div>
-                            <div className="bg-white text-primary rounded-full p-3 flex items-center justify-center h-12 w-12 shadow-sm">
-                                <Icon name="shopping_cart" className="text-[22px]" />
-                            </div>
-                        </Link>
-                    </div>
-                )}
-            </div>
+                        </div>
+                        <div className="flex items-center gap-2 font-black text-sm uppercase">
+                            Ver Carrinho <Icon name="chevron_right" />
+                        </div>
+                    </Link>
+                </div>
+            )}
         </div>
     );
 };
