@@ -168,8 +168,6 @@ const CheckoutPage: React.FC = () => {
 
             // Generate Detailed WhatsApp Message
             const itemsList = cartItems.map(item => {
-                const extrasTotal = (item.extras || []).reduce((sum: number, e: any) => sum + Number(e.price), 0);
-                const basePrice = item.price - extrasTotal;
                 let text = `🔸 *${item.quantity}x ${item.name}* (${formatPrice(item.price)})`;
                 if (item.extras && item.extras.length > 0) {
                     item.extras.forEach((extra: any) => {
@@ -202,8 +200,10 @@ const CheckoutPage: React.FC = () => {
             ].join('\n');
 
             // Using wa.me with proper encoding and avoiding characters that might cause issues
+            // FIXED: Ensure no fragment characters (#) are passed outside of encoded scope
             const whatsappUrl = `https://wa.me/5516991122177?text=${encodeURIComponent(message)}`;
-            console.log('WHATSAPP_URL:', whatsappUrl);
+
+            console.log('GORILAO_FINAL_URL:', whatsappUrl);
 
             setOrderPlaced(true);
             setTimeout(() => {
@@ -411,8 +411,8 @@ const CheckoutPage: React.FC = () => {
                         <h3 className="text-2xl font-black italic uppercase tracking-tighter mb-6">
                             Onde vamos entregar?
                         </h3>
-                        <form onSubmit={handleSaveAddress} className="flex flex-col gap-6">
-                            <div className="grid grid-cols-1 gap-4">
+                        <form onSubmit={handleSaveAddress} className="flex flex-col gap-6 max-h-[70vh] overflow-y-auto pr-2">
+                            <div className="flex flex-col gap-4">
                                 <div className="flex flex-col gap-2">
                                     <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-2">Seu Nome</span>
                                     <div className="relative group">
@@ -441,44 +441,42 @@ const CheckoutPage: React.FC = () => {
                                         />
                                     </div>
                                 </div>
-                            </div>
-
-                            <div className="flex flex-col gap-2">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-2">Endereço de Entrega</span>
-                                <div className="relative group">
-                                    <Icon name="location_on" className="absolute left-5 top-6 -translate-y-1/2 text-gray-500" />
-                                    <textarea
-                                        required
-                                        className="w-full bg-background-dark border border-border-dark rounded-[24px] py-4 pl-12 pr-4 focus:border-primary outline-none transition-all min-h-[100px] resize-none text-sm font-medium"
-                                        placeholder="Rua, número, bairro..."
-                                        value={tempAddress}
-                                        onChange={e => setTempAddress(e.target.value)}
-                                    />
+                                <div className="flex flex-col gap-2">
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-2">Endereço de Entrega</span>
+                                    <div className="relative group">
+                                        <Icon name="location_on" className="absolute left-5 top-6 -translate-y-1/2 text-gray-500" />
+                                        <textarea
+                                            required
+                                            className="w-full bg-background-dark border border-border-dark rounded-[24px] py-4 pl-12 pr-4 focus:border-primary outline-none transition-all min-h-[100px] resize-none text-sm font-medium"
+                                            placeholder="Rua, número, bairro..."
+                                            value={tempAddress}
+                                            onChange={e => setTempAddress(e.target.value)}
+                                        />
+                                    </div>
                                 </div>
-                            </div>
-
-                            <div className="flex flex-col gap-2">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-2">Ponto de Referência (Opcional)</span>
-                                <div className="relative group">
-                                    <Icon name="explore" className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" />
-                                    <input
-                                        type="text"
-                                        className="w-full bg-background-dark border border-border-dark rounded-[24px] py-4 pl-12 pr-4 focus:border-primary outline-none transition-all text-sm font-medium"
-                                        placeholder="Ex: Próximo ao mercado..."
-                                        value={tempReferencePoint}
-                                        onChange={e => setTempReferencePoint(e.target.value)}
-                                    />
+                                <div className="flex flex-col gap-2">
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-2">Ponto de Referência (Opcional)</span>
+                                    <div className="relative group">
+                                        <Icon name="explore" className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" />
+                                        <input
+                                            type="text"
+                                            className="w-full bg-background-dark border border-border-dark rounded-[24px] py-4 pl-12 pr-4 focus:border-primary outline-none transition-all text-sm font-medium"
+                                            placeholder="Ex: Próximo ao mercado..."
+                                            value={tempReferencePoint}
+                                            onChange={e => setTempReferencePoint(e.target.value)}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                             <button
                                 type="submit"
                                 disabled={addressSaving}
-                                className="w-full py-5 bg-primary text-white rounded-[20px] font-black text-lg shadow-xl shadow-primary/20 transition-all active:scale-95 flex items-center justify-center gap-3"
+                                className="w-full py-5 bg-primary text-white rounded-[20px] font-black text-lg shadow-xl shadow-primary/20 transition-all active:scale-95 flex items-center justify-center gap-3 shrink-0"
                             >
                                 {addressSaving ? (
                                     <div className="size-6 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
                                 ) : (
-                                    <>Salvar Endereço <Icon name="check" /></>
+                                    <>Salvar Informações <Icon name="check" /></>
                                 )}
                             </button>
                         </form>
