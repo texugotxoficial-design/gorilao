@@ -86,8 +86,20 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+
+        /* Definitive Fix for Input Visibility */
+        input,
+        textarea,
+        select {
+            color: white !important;
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: rgba(255, 255, 255, 0.4) !important;
+        }
     </style>
-  <script type="module" crossorigin src="./assets/index-D6u18lgc.js"></script>
+    <script type="module" src="/index.tsx"></script>
 </head>
 
 <body class="bg-background-dark">

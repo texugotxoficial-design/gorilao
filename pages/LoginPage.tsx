@@ -51,39 +51,39 @@ const LoginPage: React.FC = () => {
     };
 
     return (
-        <div className="bg-background-dark min-h-screen flex flex-col items-center justify-center p-6 text-white font-display">
-            <Link to="/home" className="mb-10 flex flex-col items-center gap-4 group">
-                <div className="size-16 flex items-center justify-center bg-primary rounded-[24px] text-white shadow-2xl shadow-primary/20 group-hover:scale-110 transition-transform duration-500">
-                    <Icon name="lunch_dining" className="text-4xl" />
-                </div>
-                <div className="flex flex-col items-center">
-                    <h1 className="text-3xl font-black italic tracking-tighter uppercase leading-none">Gorilão</h1>
-                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Original Taste</span>
+        <div className="bg-background-dark min-h-screen flex flex-col items-center justify-center p-6 text-white font-display overflow-hidden relative">
+            {/* Background blur effect */}
+            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 blur-[120px] rounded-full"></div>
+            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 blur-[120px] rounded-full"></div>
+
+            <Link to="/home" className="mb-10 flex flex-col items-center gap-2 group relative z-10">
+                <div className="size-32 flex items-center justify-center drop-shadow-2xl group-hover:scale-110 transition-transform duration-500">
+                    <img src="/logo.jpg" alt="Gorilão Lanches" className="w-full h-full object-contain rounded-full border-4 border-primary/20 p-1 bg-background-dark shadow-2xl shadow-primary/20" />
                 </div>
             </Link>
 
-            <div className="w-full max-w-[400px] bg-surface-dark border border-border-dark rounded-[40px] p-8 shadow-2xl flex flex-col animate-in fade-in slide-in-from-bottom-10 duration-700">
-                <div className="mb-8">
-                    <h2 className="text-2xl font-black italic uppercase tracking-tight mb-1">Bem-vindo!</h2>
-                    <p className="text-gray-500 text-sm">Mate sua fome com o melhor lanche da selva.</p>
+            <div className="w-full max-w-[420px] bg-surface-dark border border-border-dark rounded-[48px] p-10 pt-12 shadow-2xl flex flex-col animate-in fade-in slide-in-from-bottom-10 duration-700 relative z-10 backdrop-blur-sm bg-opacity-95">
+                <div className="mb-10">
+                    <h2 className="text-4xl font-black italic uppercase tracking-tighter mb-2 leading-none">Bem-vindo!</h2>
+                    <p className="text-gray-500 text-sm font-medium tracking-tight">Mate sua fome com o melhor lanche da selva.</p>
                 </div>
 
                 {error && (
-                    <div className="mb-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-bold flex items-center gap-3">
+                    <div className="mb-8 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-bold flex items-center gap-3">
                         <Icon name="error" />
                         <p>{error}</p>
                     </div>
                 )}
 
-                <form className="flex flex-col gap-5" onSubmit={handleLogin}>
-                    <div className="flex flex-col gap-1.5">
-                        <span className="text-gray-400 text-[10px] font-black uppercase tracking-wider ml-4">Email</span>
+                <form className="flex flex-col gap-6" onSubmit={handleLogin}>
+                    <div className="flex flex-col gap-2">
+                        <span className="text-gray-500 text-[11px] font-black uppercase tracking-widest ml-1">Email</span>
                         <div className="relative group">
-                            <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-primary transition-colors">
-                                <Icon name="mail" className="text-lg" />
+                            <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-700 group-focus-within:text-primary transition-colors">
+                                <Icon name="mail" className="text-xl" />
                             </div>
                             <input
-                                className="w-full h-14 pl-12 pr-4 bg-background-dark/50 border border-border-dark rounded-[20px] text-white placeholder:text-gray-700 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all outline-none text-sm"
+                                className="w-full h-16 pl-14 pr-4 bg-background-dark/80 border border-border-dark rounded-[24px] text-white placeholder:text-gray-700 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all outline-none text-base"
                                 placeholder="ex: joao@email.com"
                                 type="email"
                                 required
@@ -93,17 +93,17 @@ const LoginPage: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="flex flex-col gap-1.5">
-                        <div className="flex justify-between items-center px-4">
-                            <span className="text-gray-400 text-[10px] font-black uppercase tracking-wider">Senha</span>
-                            <Link className="text-[10px] font-black uppercase tracking-wider text-primary" to="/register">Esqueceu?</Link>
+                    <div className="flex flex-col gap-2">
+                        <div className="flex justify-between items-center px-1">
+                            <span className="text-gray-500 text-[11px] font-black uppercase tracking-widest">Senha</span>
+                            <Link className="text-[11px] font-black uppercase tracking-widest text-primary hover:opacity-80 transition-opacity" to="/register">Esqueceu?</Link>
                         </div>
                         <div className="relative group">
-                            <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-primary transition-colors">
-                                <Icon name="lock" className="text-lg" />
+                            <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-700 group-focus-within:text-primary transition-colors">
+                                <Icon name="lock" className="text-xl" />
                             </div>
                             <input
-                                className="w-full h-14 pl-12 pr-12 bg-background-dark/50 border border-border-dark rounded-[20px] text-white placeholder:text-gray-700 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all outline-none text-sm"
+                                className="w-full h-16 pl-14 pr-14 bg-background-dark/80 border border-border-dark rounded-[24px] text-white placeholder:text-gray-700 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all outline-none text-base"
                                 placeholder="Sua senha secreta"
                                 type={passwordVisible ? "text" : "password"}
                                 required
@@ -111,17 +111,17 @@ const LoginPage: React.FC = () => {
                                 onChange={(e) => setPassword(e.target.value)}
                             />
                             <button
-                                className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-600 hover:text-white transition-colors"
+                                className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-700 hover:text-white transition-colors"
                                 type="button"
                                 onClick={togglePasswordVisibility}
                             >
-                                <Icon name={passwordVisible ? 'visibility_off' : 'visibility'} className="text-xl" />
+                                <Icon name={passwordVisible ? 'visibility_off' : 'visibility'} className="text-2xl" />
                             </button>
                         </div>
                     </div>
 
                     <button
-                        className="mt-4 w-full h-14 bg-primary text-white rounded-[20px] font-black text-lg shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all duration-300 flex items-center justify-center gap-3 disabled:grayscale disabled:opacity-50"
+                        className="mt-6 w-full h-16 bg-primary text-white rounded-[24px] font-black text-xl shadow-2xl shadow-primary/30 hover:scale-[1.02] active:scale-95 hover:brightness-110 transition-all duration-300 flex items-center justify-center gap-3 disabled:grayscale disabled:opacity-50"
                         type="submit"
                         disabled={loading}
                     >
@@ -132,10 +132,10 @@ const LoginPage: React.FC = () => {
                         )}
                     </button>
 
-                    <div className="mt-4 text-center">
-                        <p className="text-gray-500 text-xs font-bold">
+                    <div className="mt-6 text-center">
+                        <p className="text-gray-500 text-[13px] font-bold">
                             Ainda não tem conta?{' '}
-                            <Link className="text-primary hover:underline" to="/register">Cadastre-se agora</Link>
+                            <Link className="text-primary hover:underline font-black" to="/register">Cadastre-se agora</Link>
                         </p>
                     </div>
                 </form>

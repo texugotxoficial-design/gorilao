@@ -9,7 +9,7 @@ const formatPrice = (price: number) => {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price);
 };
 
-console.log('GORILAO_APP_V: 1.1.5-final-fix');
+console.log('GORILAO_APP_V: 1.1.6');
 
 const CheckoutPage: React.FC = () => {
     const { cartItems, clearCart } = useCart();
@@ -19,16 +19,12 @@ const CheckoutPage: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [subtotal, setSubtotal] = useState(0);
     const [paymentMethod, setPaymentMethod] = useState('pix');
-    const [address, setAddress] = useState('');
-    const [referencePoint, setReferencePoint] = useState('');
     const [customerName, setCustomerName] = useState('');
     const [customerPhone, setCustomerPhone] = useState('');
-    const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
-    const [tempAddress, setTempAddress] = useState('');
-    const [tempReferencePoint, setTempReferencePoint] = useState('');
-    const [tempName, setTempName] = useState('');
-    const [tempPhone, setTempPhone] = useState('');
-    const [addressSaving, setAddressSaving] = useState(false);
+    const [street, setStreet] = useState('');
+    const [houseNumber, setHouseNumber] = useState('');
+    const [neighborhood, setNeighborhood] = useState('');
+    const [referencePoint, setReferencePoint] = useState('');
     const [orderPlaced, setOrderPlaced] = useState(false);
 
     // Payment Sub-options
@@ -54,51 +50,37 @@ const CheckoutPage: React.FC = () => {
 
             if (data) {
                 if (data.address) {
-                    setAddress(data.address);
-                    setTempAddress(data.address);
+                    // Best effort parsing: "Street, Number - Neighborhood"
+                    const addressStr = data.address;
+                    const dashSplit = addressStr.split(' - ');
+                    const neighborhoodPart = dashSplit.length > 1 ? dashSplit[1] : '';
+                    const mainPart = dashSplit[0];
+                    const commaSplit = mainPart.split(', ');
+                    const streetPart = commaSplit[0];
+                    const numberPart = commaSplit.length > 1 ? commaSplit[1] : '';
+
+                    setStreet(streetPart);
+                    setHouseNumber(numberPart);
+                    setNeighborhood(neighborhoodPart);
                 }
                 if (data.reference_point) {
                     setReferencePoint(data.reference_point);
-                    setTempReferencePoint(data.reference_point);
                 }
                 if (data.full_name) {
                     setCustomerName(data.full_name);
-                    setTempName(data.full_name);
                 }
                 if (data.phone) {
                     setCustomerPhone(data.phone);
-                    setTempPhone(data.phone);
                 }
             }
         };
         fetchProfile();
     }, [cartItems, navigate, user]);
 
-    const handleSaveAddress = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!user) return;
-        setAddressSaving(true);
-        try {
-            await supabase.from('profiles').upsert({
-                id: user.id,
-                address: tempAddress,
-                reference_point: tempReferencePoint,
-                full_name: tempName,
-                phone: tempPhone
-            });
-            setAddress(tempAddress);
-            setReferencePoint(tempReferencePoint);
-            setCustomerName(tempName);
-            setCustomerPhone(tempPhone);
-            setIsAddressModalOpen(false);
-        } finally {
-            setAddressSaving(false);
-        }
-    };
 
     const handlePlaceOrder = async () => {
-        if (!address) {
-            setIsAddressModalOpen(true);
+        if (!customerName || !customerPhone || !street || !houseNumber) {
+            alert('Por favor, preencha todos os campos obrigatórios.');
             return;
         }
 
@@ -110,6 +92,7 @@ const CheckoutPage: React.FC = () => {
         setLoading(true);
         try {
             const orderId = Math.random().toString(36).substring(7).toUpperCase();
+            const fullAddress = `${street}, ${houseNumber}${neighborhood ? ` - ${neighborhood}` : ''}`;
 
             // Prepare payment details
             const paymentDetails: any = {};
@@ -128,7 +111,7 @@ const CheckoutPage: React.FC = () => {
                     status: 'pending',
                     payment_method: paymentMethod,
                     payment_details: paymentDetails,
-                    delivery_address: address,
+                    delivery_address: fullAddress,
                     reference_point: referencePoint,
                     order_number: orderId,
                     items: cartItems.map(item => ({
@@ -145,15 +128,14 @@ const CheckoutPage: React.FC = () => {
 
             if (orderError) throw orderError;
 
-            // Fetch latest profile info to ensure accuracy
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('full_name, phone')
-                .eq('id', user?.id)
-                .single();
-
-            const customerDisplayName = profile?.full_name || customerName || user?.email || 'Cliente';
-            const customerDisplayPhone = profile?.phone || customerPhone || 'Não informado';
+            // Update user profile with latest delivery info
+            await supabase.from('profiles').upsert({
+                id: user?.id,
+                full_name: customerName,
+                phone: customerPhone,
+                address: fullAddress,
+                reference_point: referencePoint
+            });
 
             // Payment text for WhatsApp
             let paymentText = paymentMethod.toUpperCase();
@@ -180,10 +162,11 @@ const CheckoutPage: React.FC = () => {
             const message = [
                 `*🦍 NOVO PEDIDO - GORILÃO LANCHES*`,
                 `----------------------------------`,
-                `*Pedido:* #${orderId}`,
-                `*Cliente:* ${customerDisplayName}`,
-                `*WhatsApp:* ${customerDisplayPhone}`,
-                `*Endereço:* ${address}`,
+                `*Pedido:* No ${orderId}`,
+                `*Cliente:* ${customerName}`,
+                `*WhatsApp:* ${customerPhone}`,
+                `*Endereço:* ${street}, nº ${houseNumber}`,
+                `*Bairro:* ${neighborhood}`,
                 `*Ponto de Ref.:* ${referencePoint || 'Não informado'}`,
                 `*Pagamento:* ${paymentText}`,
                 `----------------------------------`,
@@ -199,11 +182,7 @@ const CheckoutPage: React.FC = () => {
                 `_Aguarde a confirmação da nossa equipe._`
             ].join('\n');
 
-            // Using wa.me with proper encoding and avoiding characters that might cause issues
-            // FIXED: Ensure no fragment characters (#) are passed outside of encoded scope
             const whatsappUrl = `https://wa.me/5516991122177?text=${encodeURIComponent(message)}`;
-
-            console.log('GORILAO_FINAL_URL:', whatsappUrl);
 
             setOrderPlaced(true);
             setTimeout(() => {
@@ -228,41 +207,85 @@ const CheckoutPage: React.FC = () => {
             <main className="flex flex-col gap-6">
                 {/* Delivery Section */}
                 <section className="bg-surface-dark rounded-[32px] border border-border-dark p-6 shadow-xl">
-                    <div className="flex items-center justify-between mb-6">
-                        <div className="flex items-center gap-3">
-                            <div className="size-10 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
-                                <Icon name="location_on" />
-                            </div>
-                            <h2 className="text-sm font-black uppercase tracking-widest text-gray-400">Entrega</h2>
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="size-10 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
+                            <Icon name="location_on" />
                         </div>
-                        <button
-                            onClick={() => setIsAddressModalOpen(true)}
-                            className="text-xs font-black uppercase tracking-widest text-primary hover:bg-primary/5 px-4 py-2 rounded-xl transition-all"
-                        >
-                            Alterar
-                        </button>
+                        <h2 className="text-sm font-black uppercase tracking-widest text-gray-400">Informações de Entrega</h2>
                     </div>
 
-                    <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-2 mb-1">
-                            <Icon name="person" className="text-gray-500 text-xs" />
-                            <p className="text-white font-bold text-sm leading-relaxed">
-                                {customerName || 'Identifique-se'}
-                            </p>
+                    <div className="grid grid-cols-1 gap-4">
+                        <div className="flex flex-col gap-2">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Seu Nome</span>
+                            <div className="relative">
+                                <Icon name="person" className="absolute left-4 top-1/2 -translate-y-1/2 text-primary" />
+                                <input
+                                    type="text"
+                                    value={customerName}
+                                    onChange={(e) => setCustomerName(e.target.value)}
+                                    placeholder="Ex: João Silva"
+                                    className="w-full bg-background-dark border border-border-dark rounded-2xl py-4 pl-12 pr-4 outline-none focus:border-primary font-bold text-white"
+                                />
+                            </div>
                         </div>
-                        <div className="flex items-center gap-2 mb-2">
-                            <Icon name="location_on" className="text-gray-500 text-xs" />
-                            <p className="text-gray-300 text-xs leading-relaxed">
-                                {address || 'Nenhum endereço cadastrado'}
-                            </p>
+
+                        <div className="flex flex-col gap-2">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">WhatsApp</span>
+                            <div className="relative">
+                                <Icon name="phone" className="absolute left-4 top-1/2 -translate-y-1/2 text-primary" />
+                                <input
+                                    type="tel"
+                                    value={customerPhone}
+                                    onChange={(e) => setCustomerPhone(e.target.value)}
+                                    placeholder="Ex: (16) 99999-9999"
+                                    className="w-full bg-background-dark border border-border-dark rounded-2xl py-4 pl-12 pr-4 outline-none focus:border-primary font-bold text-white"
+                                />
+                            </div>
                         </div>
-                        {referencePoint && (
-                            <p className="text-gray-400 text-[10px] italic ml-6 mb-2">
-                                Ref: {referencePoint}
-                            </p>
-                        )}
-                        <div className="flex items-center gap-2 text-green-500 font-black text-[10px] uppercase tracking-widest">
-                            <Icon name="check_circle" className="text-xs" /> Frete Grátis na Selva
+
+                        <div className="grid grid-cols-3 gap-2">
+                            <div className="col-span-2 flex flex-col gap-2">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Rua</span>
+                                <input
+                                    type="text"
+                                    value={street}
+                                    onChange={(e) => setStreet(e.target.value)}
+                                    placeholder="Nome da rua"
+                                    className="w-full bg-background-dark border border-border-dark rounded-2xl py-4 px-4 outline-none focus:border-primary font-bold text-white"
+                                />
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Nº</span>
+                                <input
+                                    type="text"
+                                    value={houseNumber}
+                                    onChange={(e) => setHouseNumber(e.target.value)}
+                                    placeholder="123"
+                                    className="w-full bg-background-dark border border-border-dark rounded-2xl py-4 px-4 outline-none focus:border-primary font-bold text-white text-center"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col gap-2">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Bairro</span>
+                            <input
+                                type="text"
+                                value={neighborhood}
+                                onChange={(e) => setNeighborhood(e.target.value)}
+                                placeholder="Seu bairro"
+                                className="w-full bg-background-dark border border-border-dark rounded-2xl py-4 px-4 outline-none focus:border-primary font-bold text-white"
+                            />
+                        </div>
+
+                        <div className="flex flex-col gap-2">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Ponto de Referência</span>
+                            <input
+                                type="text"
+                                value={referencePoint}
+                                onChange={(e) => setReferencePoint(e.target.value)}
+                                placeholder="Ex: Perto do mercado"
+                                className="w-full bg-background-dark border border-border-dark rounded-2xl py-4 px-4 outline-none focus:border-primary font-bold text-white"
+                            />
                         </div>
                     </div>
                 </section>
@@ -402,87 +425,6 @@ const CheckoutPage: React.FC = () => {
                 </section>
             </main>
 
-            {/* Address Modal */}
-            {isAddressModalOpen && (
-                <div className="fixed inset-0 z-[100] flex items-end justify-center">
-                    <div className="absolute inset-0 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300" onClick={() => setIsAddressModalOpen(false)}></div>
-                    <div className="relative bg-surface-dark w-full rounded-t-[40px] border-t border-border-dark p-8 pb-12 shadow-2xl animate-in slide-in-from-bottom-full duration-500">
-                        <div className="w-12 h-1.5 bg-border-dark rounded-full mx-auto mb-8"></div>
-                        <h3 className="text-2xl font-black italic uppercase tracking-tighter mb-6">
-                            Onde vamos entregar?
-                        </h3>
-                        <form onSubmit={handleSaveAddress} className="flex flex-col gap-6 max-h-[70vh] overflow-y-auto pr-2">
-                            <div className="flex flex-col gap-4">
-                                <div className="flex flex-col gap-2">
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-2">Seu Nome</span>
-                                    <div className="relative group">
-                                        <Icon name="person" className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" />
-                                        <input
-                                            type="text"
-                                            required
-                                            className="w-full bg-background-dark border border-border-dark rounded-[24px] py-4 pl-12 pr-4 focus:border-primary outline-none transition-all text-sm font-medium"
-                                            placeholder="Ex: João Silva"
-                                            value={tempName}
-                                            onChange={e => setTempName(e.target.value)}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="flex flex-col gap-2">
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-2">WhatsApp</span>
-                                    <div className="relative group">
-                                        <Icon name="phone" className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" />
-                                        <input
-                                            type="tel"
-                                            required
-                                            className="w-full bg-background-dark border border-border-dark rounded-[24px] py-4 pl-12 pr-4 focus:border-primary outline-none transition-all text-sm font-medium"
-                                            placeholder="Ex: (16) 99911-2217"
-                                            value={tempPhone}
-                                            onChange={e => setTempPhone(e.target.value)}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="flex flex-col gap-2">
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-2">Endereço de Entrega</span>
-                                    <div className="relative group">
-                                        <Icon name="location_on" className="absolute left-5 top-6 -translate-y-1/2 text-gray-500" />
-                                        <textarea
-                                            required
-                                            className="w-full bg-background-dark border border-border-dark rounded-[24px] py-4 pl-12 pr-4 focus:border-primary outline-none transition-all min-h-[100px] resize-none text-sm font-medium"
-                                            placeholder="Rua, número, bairro..."
-                                            value={tempAddress}
-                                            onChange={e => setTempAddress(e.target.value)}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="flex flex-col gap-2">
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-2">Ponto de Referência (Opcional)</span>
-                                    <div className="relative group">
-                                        <Icon name="explore" className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" />
-                                        <input
-                                            type="text"
-                                            className="w-full bg-background-dark border border-border-dark rounded-[24px] py-4 pl-12 pr-4 focus:border-primary outline-none transition-all text-sm font-medium"
-                                            placeholder="Ex: Próximo ao mercado..."
-                                            value={tempReferencePoint}
-                                            onChange={e => setTempReferencePoint(e.target.value)}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                            <button
-                                type="submit"
-                                disabled={addressSaving}
-                                className="w-full py-5 bg-primary text-white rounded-[20px] font-black text-lg shadow-xl shadow-primary/20 transition-all active:scale-95 flex items-center justify-center gap-3 shrink-0"
-                            >
-                                {addressSaving ? (
-                                    <div className="size-6 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
-                                ) : (
-                                    <>Salvar Informações <Icon name="check" /></>
-                                )}
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };
