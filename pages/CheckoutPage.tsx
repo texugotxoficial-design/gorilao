@@ -20,10 +20,12 @@ const CheckoutPage: React.FC = () => {
     const [subtotal, setSubtotal] = useState(0);
     const [paymentMethod, setPaymentMethod] = useState('pix');
     const [address, setAddress] = useState('');
+    const [referencePoint, setReferencePoint] = useState('');
     const [customerName, setCustomerName] = useState('');
     const [customerPhone, setCustomerPhone] = useState('');
     const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
     const [tempAddress, setTempAddress] = useState('');
+    const [tempReferencePoint, setTempReferencePoint] = useState('');
     const [addressSaving, setAddressSaving] = useState(false);
 
     // Payment Sub-options
@@ -43,7 +45,7 @@ const CheckoutPage: React.FC = () => {
             if (!user) return;
             const { data } = await supabase
                 .from('profiles')
-                .select('address, full_name, phone')
+                .select('address, reference_point, full_name, phone')
                 .eq('id', user.id)
                 .single();
 
@@ -51,6 +53,10 @@ const CheckoutPage: React.FC = () => {
                 if (data.address) {
                     setAddress(data.address);
                     setTempAddress(data.address);
+                }
+                if (data.reference_point) {
+                    setReferencePoint(data.reference_point);
+                    setTempReferencePoint(data.reference_point);
                 }
                 if (data.full_name) setCustomerName(data.full_name);
                 if (data.phone) setCustomerPhone(data.phone);
@@ -64,8 +70,13 @@ const CheckoutPage: React.FC = () => {
         if (!user) return;
         setAddressSaving(true);
         try {
-            await supabase.from('profiles').upsert({ id: user.id, address: tempAddress });
+            await supabase.from('profiles').upsert({
+                id: user.id,
+                address: tempAddress,
+                reference_point: tempReferencePoint
+            });
             setAddress(tempAddress);
+            setReferencePoint(tempReferencePoint);
             setIsAddressModalOpen(false);
         } finally {
             setAddressSaving(false);
@@ -105,6 +116,7 @@ const CheckoutPage: React.FC = () => {
                     payment_method: paymentMethod,
                     payment_details: paymentDetails,
                     delivery_address: address,
+                    reference_point: referencePoint,
                     order_number: orderId,
                     items: cartItems.map(item => ({
                         product_id: item.id,
@@ -159,6 +171,7 @@ const CheckoutPage: React.FC = () => {
                 `*Cliente:* ${customerDisplayName}`,
                 `*WhatsApp:* ${customerDisplayPhone}`,
                 `*Endereço:* ${address}`,
+                `*Ponto de Ref.:* ${referencePoint || 'Não informado'}`,
                 `*Pagamento:* ${paymentText}`,
                 `----------------------------------`,
                 ``,
@@ -214,6 +227,11 @@ const CheckoutPage: React.FC = () => {
                         <p className="text-white font-bold text-sm leading-relaxed">
                             {address || 'Nenhum endereço cadastrado'}
                         </p>
+                        {referencePoint && (
+                            <p className="text-gray-400 text-xs italic">
+                                Ref: {referencePoint}
+                            </p>
+                        )}
                         <div className="flex items-center gap-2 text-green-500 font-black text-[10px] uppercase tracking-widest">
                             <Icon name="check_circle" className="text-xs" /> Frete Grátis na Selva
                         </div>
@@ -366,15 +384,30 @@ const CheckoutPage: React.FC = () => {
                         </h3>
                         <form onSubmit={handleSaveAddress} className="flex flex-col gap-6">
                             <div className="flex flex-col gap-2">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-2">Endereço de Entrega</span>
                                 <div className="relative group">
                                     <Icon name="location_on" className="absolute left-5 top-6 -translate-y-1/2 text-gray-500" />
                                     <textarea
                                         required
                                         autoFocus
-                                        className="w-full bg-background-dark border border-border-dark rounded-[24px] py-4 pl-12 pr-4 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all min-h-[120px] resize-none text-sm font-medium"
-                                        placeholder="Rua, número, bairro, complemento..."
+                                        className="w-full bg-background-dark border border-border-dark rounded-[24px] py-4 pl-12 pr-4 focus:border-primary outline-none transition-all min-h-[100px] resize-none text-sm font-medium"
+                                        placeholder="Rua, número, bairro..."
                                         value={tempAddress}
                                         onChange={e => setTempAddress(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col gap-2">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-2">Ponto de Referência (Opcional)</span>
+                                <div className="relative group">
+                                    <Icon name="explore" className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" />
+                                    <input
+                                        type="text"
+                                        className="w-full bg-background-dark border border-border-dark rounded-[24px] py-4 pl-12 pr-4 focus:border-primary outline-none transition-all text-sm font-medium"
+                                        placeholder="Ex: Próximo ao mercado..."
+                                        value={tempReferencePoint}
+                                        onChange={e => setTempReferencePoint(e.target.value)}
                                     />
                                 </div>
                             </div>
