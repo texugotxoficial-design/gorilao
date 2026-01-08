@@ -93,23 +93,20 @@ const CheckoutPage: React.FC = () => {
                     payment_method: paymentMethod,
                     payment_details: paymentDetails,
                     delivery_address: address,
-                    id: orderId
+                    order_number: orderId,
+                    items: cartItems.map(item => ({
+                        product_id: item.id,
+                        name: item.name,
+                        price: item.price,
+                        quantity: item.quantity,
+                        image_url: item.image_url,
+                        extras: item.extras || []
+                    }))
                 })
                 .select()
                 .single();
 
             if (orderError) throw orderError;
-
-            // Create order items
-            const orderItems = cartItems.map(item => ({
-                order_id: orderId,
-                product_id: item.id,
-                quantity: item.quantity,
-                unit_price: item.price
-            }));
-
-            const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
-            if (itemsError) throw itemsError;
 
             // Payment text for WhatsApp
             let paymentText = paymentMethod.toUpperCase();
