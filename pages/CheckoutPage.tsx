@@ -9,7 +9,7 @@ const formatPrice = (price: number) => {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price);
 };
 
-console.log('GORILAO_APP_V: 1.1.2-button-fix');
+console.log('GORILAO_APP_V: 1.1.3-final-wa');
 
 const CheckoutPage: React.FC = () => {
     const { cartItems, clearCart } = useCart();
@@ -26,7 +26,10 @@ const CheckoutPage: React.FC = () => {
     const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
     const [tempAddress, setTempAddress] = useState('');
     const [tempReferencePoint, setTempReferencePoint] = useState('');
+    const [tempName, setTempName] = useState('');
+    const [tempPhone, setTempPhone] = useState('');
     const [addressSaving, setAddressSaving] = useState(false);
+    const [orderPlaced, setOrderPlaced] = useState(false);
 
     // Payment Sub-options
     const [needsChange, setNeedsChange] = useState(false);
@@ -34,7 +37,7 @@ const CheckoutPage: React.FC = () => {
     const [cardType, setCardType] = useState('credit'); // credit, debit, voucher
 
     useEffect(() => {
-        if (cartItems.length === 0) {
+        if (cartItems.length === 0 && !orderPlaced) {
             navigate('/menu');
             return;
         }
@@ -58,8 +61,14 @@ const CheckoutPage: React.FC = () => {
                     setReferencePoint(data.reference_point);
                     setTempReferencePoint(data.reference_point);
                 }
-                if (data.full_name) setCustomerName(data.full_name);
-                if (data.phone) setCustomerPhone(data.phone);
+                if (data.full_name) {
+                    setCustomerName(data.full_name);
+                    setTempName(data.full_name);
+                }
+                if (data.phone) {
+                    setCustomerPhone(data.phone);
+                    setTempPhone(data.phone);
+                }
             }
         };
         fetchProfile();
@@ -73,10 +82,14 @@ const CheckoutPage: React.FC = () => {
             await supabase.from('profiles').upsert({
                 id: user.id,
                 address: tempAddress,
-                reference_point: tempReferencePoint
+                reference_point: tempReferencePoint,
+                full_name: tempName,
+                phone: tempPhone
             });
             setAddress(tempAddress);
             setReferencePoint(tempReferencePoint);
+            setCustomerName(tempName);
+            setCustomerPhone(tempPhone);
             setIsAddressModalOpen(false);
         } finally {
             setAddressSaving(false);
@@ -155,6 +168,8 @@ const CheckoutPage: React.FC = () => {
 
             // Generate Detailed WhatsApp Message
             const itemsList = cartItems.map(item => {
+                const extrasTotal = (item.extras || []).reduce((sum: number, e: any) => sum + Number(e.price), 0);
+                const basePrice = item.price - extrasTotal;
                 let text = `🔸 *${item.quantity}x ${item.name}* (${formatPrice(item.price)})`;
                 if (item.extras && item.extras.length > 0) {
                     item.extras.forEach((extra: any) => {
@@ -188,8 +203,11 @@ const CheckoutPage: React.FC = () => {
 
             const whatsappUrl = `https://wa.me/5516991122177?text=${encodeURIComponent(message)}`;
 
-            clearCart();
-            window.location.href = whatsappUrl;
+            setOrderPlaced(true);
+            setTimeout(() => {
+                clearCart();
+                window.location.href = whatsappUrl;
+            }, 100);
         } catch (error) {
             console.error('Error placing order:', error);
             alert('Erro ao processar pedido. Tente novamente.');
@@ -409,6 +427,37 @@ const CheckoutPage: React.FC = () => {
                                         value={tempReferencePoint}
                                         onChange={e => setTempReferencePoint(e.target.value)}
                                     />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-4">
+                                <div className="flex flex-col gap-2">
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-2">Seu Nome</span>
+                                    <div className="relative group">
+                                        <Icon name="person" className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" />
+                                        <input
+                                            type="text"
+                                            required
+                                            className="w-full bg-background-dark border border-border-dark rounded-[24px] py-4 pl-12 pr-4 focus:border-primary outline-none transition-all text-sm font-medium"
+                                            placeholder="Ex: João Silva"
+                                            value={tempName}
+                                            onChange={e => setTempName(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="flex flex-col gap-2">
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-2">WhatsApp</span>
+                                    <div className="relative group">
+                                        <Icon name="phone" className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" />
+                                        <input
+                                            type="tel"
+                                            required
+                                            className="w-full bg-background-dark border border-border-dark rounded-[24px] py-4 pl-12 pr-4 focus:border-primary outline-none transition-all text-sm font-medium"
+                                            placeholder="Ex: (16) 99999-9999"
+                                            value={tempPhone}
+                                            onChange={e => setTempPhone(e.target.value)}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                             <button
