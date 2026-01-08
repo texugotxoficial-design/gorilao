@@ -5,9 +5,11 @@ import Icon from '../components/Icon';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabaseClient';
-import { formatPrice } from '../utils/format';
+const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price);
+};
 
-console.log('GORILAO_APP_V: 1.1.1-final-fix');
+console.log('GORILAO_APP_V: 1.1.2-button-fix');
 
 const CheckoutPage: React.FC = () => {
     const { cartItems, clearCart } = useCart();
