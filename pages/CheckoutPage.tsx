@@ -20,6 +20,8 @@ const CheckoutPage: React.FC = () => {
     const [subtotal, setSubtotal] = useState(0);
     const [paymentMethod, setPaymentMethod] = useState('pix');
     const [address, setAddress] = useState('');
+    const [customerName, setCustomerName] = useState('');
+    const [customerPhone, setCustomerPhone] = useState('');
     const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
     const [tempAddress, setTempAddress] = useState('');
     const [addressSaving, setAddressSaving] = useState(false);
@@ -37,15 +39,24 @@ const CheckoutPage: React.FC = () => {
         const total = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
         setSubtotal(total);
 
-        const fetchAddress = async () => {
+        const fetchProfile = async () => {
             if (!user) return;
-            const { data } = await supabase.from('profiles').select('address').eq('id', user.id).single();
-            if (data?.address) {
-                setAddress(data.address);
-                setTempAddress(data.address);
+            const { data } = await supabase
+                .from('profiles')
+                .select('address, full_name, phone')
+                .eq('id', user.id)
+                .single();
+
+            if (data) {
+                if (data.address) {
+                    setAddress(data.address);
+                    setTempAddress(data.address);
+                }
+                if (data.full_name) setCustomerName(data.full_name);
+                if (data.phone) setCustomerPhone(data.phone);
             }
         };
-        fetchAddress();
+        fetchProfile();
     }, [cartItems, navigate, user]);
 
     const handleSaveAddress = async (e: React.FormEvent) => {
@@ -121,16 +132,32 @@ const CheckoutPage: React.FC = () => {
             }
 
             // Generate WhatsApp Message
-            const message = `*🦍 NOVO PEDIDO - GORILÃO LANCHES*%0A%0A` +
-                `*Pedido:* #${orderId}%0A` +
-                `*Cliente:* ${user?.email}%0A` +
-                `*Endereço:* ${address}%0A` +
-                `*Pagamento:* ${paymentText}%0A%0A` +
-                `*ÍTENS:*%0A` +
-                cartItems.map(item => `- ${item.quantity}x ${item.name} (${formatPrice(item.price)})`).join('%0A') +
-                `%0A%0A*TOTAL: ${formatPrice(subtotal)}*`;
+            const message = [
+                `*🦍 NOVO PEDIDO - GORILÃO LANCHES*`,
+                ``,
+                `*Pedido:* #${orderId}`,
+                `*Cliente:* ${customerName || user?.email}`,
+                `*Telefone:* ${customerPhone || 'Não informado'}`,
+                `*Endereço:* ${address}`,
+                `*Pagamento:* ${paymentText}`,
+                ``,
+                `*ÍTENS:*`,
+                ...cartItems.map(item => {
+                    let itemText = `- ${item.quantity}x ${item.name} (${formatPrice(item.price)})`;
+                    if (item.extras && item.extras.length > 0) {
+                        item.extras.forEach((extra: any) => {
+                            itemText += `\n  + ${extra.name} (${formatPrice(extra.price)})`;
+                        });
+                    }
+                    return itemText;
+                }),
+                ``,
+                `*TOTAL: ${formatPrice(subtotal)}*`,
+                ``,
+                `_Pedido finalizado via Gorilão App_`
+            ].join('\n');
 
-            const whatsappUrl = `https://wa.me/5516991122177?text=${message}`;
+            const whatsappUrl = `https://wa.me/5516991122177?text=${encodeURIComponent(message)}`;
 
             clearCart();
             window.location.href = whatsappUrl;
