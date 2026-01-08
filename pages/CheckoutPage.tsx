@@ -120,6 +120,16 @@ const CheckoutPage: React.FC = () => {
 
             if (orderError) throw orderError;
 
+            // Fetch latest profile info to ensure accuracy
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('full_name, phone')
+                .eq('id', user?.id)
+                .single();
+
+            const customerDisplayName = profile?.full_name || customerName || user?.email || 'Cliente';
+            const customerDisplayPhone = profile?.phone || customerPhone || 'Não informado';
+
             // Payment text for WhatsApp
             let paymentText = paymentMethod.toUpperCase();
             if (paymentMethod === 'cash' && needsChange) {
@@ -128,33 +138,39 @@ const CheckoutPage: React.FC = () => {
                 const cardLabels: any = { credit: 'Crédito', debit: 'Débito', voucher: 'Alimentação' };
                 paymentText += ` (${cardLabels[cardType]})`;
             } else if (paymentMethod === 'pix') {
-                paymentText += ` (Aguardando comprovante)`;
+                paymentText += ` (PAGAMENTO VIA PIX)`;
             }
 
-            // Generate WhatsApp Message
+            // Generate Detailed WhatsApp Message
+            const itemsList = cartItems.map(item => {
+                let text = `🔸 *${item.quantity}x ${item.name}* (${formatPrice(item.price)})`;
+                if (item.extras && item.extras.length > 0) {
+                    item.extras.forEach((extra: any) => {
+                        text += `\n   └─ + ${extra.name} (${formatPrice(extra.price)})`;
+                    });
+                }
+                return text;
+            }).join('\n\n');
+
             const message = [
                 `*🦍 NOVO PEDIDO - GORILÃO LANCHES*`,
-                ``,
+                `----------------------------------`,
                 `*Pedido:* #${orderId}`,
-                `*Cliente:* ${customerName || user?.email}`,
-                `*Telefone:* ${customerPhone || 'Não informado'}`,
+                `*Cliente:* ${customerDisplayName}`,
+                `*WhatsApp:* ${customerDisplayPhone}`,
                 `*Endereço:* ${address}`,
                 `*Pagamento:* ${paymentText}`,
+                `----------------------------------`,
                 ``,
-                `*ÍTENS:*`,
-                ...cartItems.map(item => {
-                    let itemText = `- ${item.quantity}x ${item.name} (${formatPrice(item.price)})`;
-                    if (item.extras && item.extras.length > 0) {
-                        item.extras.forEach((extra: any) => {
-                            itemText += `\n  + ${extra.name} (${formatPrice(extra.price)})`;
-                        });
-                    }
-                    return itemText;
-                }),
+                `*ÍTENS DO PEDIDO:*`,
+                itemsList,
                 ``,
+                `----------------------------------`,
                 `*TOTAL: ${formatPrice(subtotal)}*`,
+                `----------------------------------`,
                 ``,
-                `_Pedido finalizado via Gorilão App_`
+                `_Pedido enviado via Gorilão App_`,
+                `_Aguarde a confirmação da nossa equipe._`
             ].join('\n');
 
             const whatsappUrl = `https://wa.me/5516991122177?text=${encodeURIComponent(message)}`;
