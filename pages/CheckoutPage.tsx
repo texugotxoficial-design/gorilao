@@ -9,7 +9,7 @@ const formatPrice = (price: number) => {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price);
 };
 
-console.log('GORILAO_APP_V: 1.1.3-final-wa');
+console.log('GORILAO_APP_V: 1.1.4-v-check');
 
 const CheckoutPage: React.FC = () => {
     const { cartItems, clearCart } = useCart();
@@ -202,6 +202,7 @@ const CheckoutPage: React.FC = () => {
             ].join('\n');
 
             const whatsappUrl = `https://wa.me/5516991122177?text=${encodeURIComponent(message)}`;
+            console.log('WHATSAPP_URL:', whatsappUrl);
 
             setOrderPlaced(true);
             setTimeout(() => {
