@@ -9,7 +9,7 @@ const formatPrice = (price: number) => {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price);
 };
 
-console.log('GORILAO_APP_V: 1.1.4-v-check');
+console.log('GORILAO_APP_V: 1.1.5-final-fix');
 
 const CheckoutPage: React.FC = () => {
     const { cartItems, clearCart } = useCart();
@@ -201,6 +201,7 @@ const CheckoutPage: React.FC = () => {
                 `_Aguarde a confirmação da nossa equipe._`
             ].join('\n');
 
+            // Using wa.me with proper encoding and avoiding characters that might cause issues
             const whatsappUrl = `https://wa.me/5516991122177?text=${encodeURIComponent(message)}`;
             console.log('WHATSAPP_URL:', whatsappUrl);
 
@@ -243,11 +244,20 @@ const CheckoutPage: React.FC = () => {
                     </div>
 
                     <div className="flex flex-col gap-1">
-                        <p className="text-white font-bold text-sm leading-relaxed">
-                            {address || 'Nenhum endereço cadastrado'}
-                        </p>
+                        <div className="flex items-center gap-2 mb-1">
+                            <Icon name="person" className="text-gray-500 text-xs" />
+                            <p className="text-white font-bold text-sm leading-relaxed">
+                                {customerName || 'Identifique-se'}
+                            </p>
+                        </div>
+                        <div className="flex items-center gap-2 mb-2">
+                            <Icon name="location_on" className="text-gray-500 text-xs" />
+                            <p className="text-gray-300 text-xs leading-relaxed">
+                                {address || 'Nenhum endereço cadastrado'}
+                            </p>
+                        </div>
                         {referencePoint && (
-                            <p className="text-gray-400 text-xs italic">
+                            <p className="text-gray-400 text-[10px] italic ml-6 mb-2">
                                 Ref: {referencePoint}
                             </p>
                         )}
@@ -402,35 +412,6 @@ const CheckoutPage: React.FC = () => {
                             Onde vamos entregar?
                         </h3>
                         <form onSubmit={handleSaveAddress} className="flex flex-col gap-6">
-                            <div className="flex flex-col gap-2">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-2">Endereço de Entrega</span>
-                                <div className="relative group">
-                                    <Icon name="location_on" className="absolute left-5 top-6 -translate-y-1/2 text-gray-500" />
-                                    <textarea
-                                        required
-                                        autoFocus
-                                        className="w-full bg-background-dark border border-border-dark rounded-[24px] py-4 pl-12 pr-4 focus:border-primary outline-none transition-all min-h-[100px] resize-none text-sm font-medium"
-                                        placeholder="Rua, número, bairro..."
-                                        value={tempAddress}
-                                        onChange={e => setTempAddress(e.target.value)}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col gap-2">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-2">Ponto de Referência (Opcional)</span>
-                                <div className="relative group">
-                                    <Icon name="explore" className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" />
-                                    <input
-                                        type="text"
-                                        className="w-full bg-background-dark border border-border-dark rounded-[24px] py-4 pl-12 pr-4 focus:border-primary outline-none transition-all text-sm font-medium"
-                                        placeholder="Ex: Próximo ao mercado..."
-                                        value={tempReferencePoint}
-                                        onChange={e => setTempReferencePoint(e.target.value)}
-                                    />
-                                </div>
-                            </div>
-
                             <div className="grid grid-cols-1 gap-4">
                                 <div className="flex flex-col gap-2">
                                     <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-2">Seu Nome</span>
@@ -454,11 +435,39 @@ const CheckoutPage: React.FC = () => {
                                             type="tel"
                                             required
                                             className="w-full bg-background-dark border border-border-dark rounded-[24px] py-4 pl-12 pr-4 focus:border-primary outline-none transition-all text-sm font-medium"
-                                            placeholder="Ex: (16) 99999-9999"
+                                            placeholder="Ex: (16) 99911-2217"
                                             value={tempPhone}
                                             onChange={e => setTempPhone(e.target.value)}
                                         />
                                     </div>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col gap-2">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-2">Endereço de Entrega</span>
+                                <div className="relative group">
+                                    <Icon name="location_on" className="absolute left-5 top-6 -translate-y-1/2 text-gray-500" />
+                                    <textarea
+                                        required
+                                        className="w-full bg-background-dark border border-border-dark rounded-[24px] py-4 pl-12 pr-4 focus:border-primary outline-none transition-all min-h-[100px] resize-none text-sm font-medium"
+                                        placeholder="Rua, número, bairro..."
+                                        value={tempAddress}
+                                        onChange={e => setTempAddress(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col gap-2">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-2">Ponto de Referência (Opcional)</span>
+                                <div className="relative group">
+                                    <Icon name="explore" className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" />
+                                    <input
+                                        type="text"
+                                        className="w-full bg-background-dark border border-border-dark rounded-[24px] py-4 pl-12 pr-4 focus:border-primary outline-none transition-all text-sm font-medium"
+                                        placeholder="Ex: Próximo ao mercado..."
+                                        value={tempReferencePoint}
+                                        onChange={e => setTempReferencePoint(e.target.value)}
+                                    />
                                 </div>
                             </div>
                             <button
