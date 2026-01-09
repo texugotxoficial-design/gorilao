@@ -45,6 +45,7 @@ const HomePage: React.FC = () => {
     const [products, setProducts] = useState<Product[]>([]);
     const [banners, setBanners] = useState<Banner[]>([]);
     const [loading, setLoading] = useState(true);
+    const [reiDaSelva, setReiDaSelva] = useState<Product | null>(null);
 
     useEffect(() => {
         fetchData();
@@ -60,6 +61,31 @@ const HomePage: React.FC = () => {
             supabase.removeChannel(channel);
         };
     }, []);
+
+    // Rei da Selva Logic - Automatic Rotation
+    useEffect(() => {
+        if (products.length === 0 || categories.length === 0) return;
+
+        const updateRei = () => {
+            const pool = products.filter(p => {
+                const cat = categories.find(c => c.id === p.category_id);
+                const name = cat?.name.toLowerCase() || '';
+                const slug = cat?.slug || '';
+                // Include Lanches, Burgers, and Portions/Sides
+                return slug.includes('lanche') || slug.includes('burger') || slug.includes('porca') || slug.includes('acompanha') ||
+                    name.includes('lanche') || name.includes('hamb') || name.includes('burger') || name.includes('porç') || name.includes('fritas');
+            });
+
+            if (pool.length > 0) {
+                const randomIndex = Math.floor(Math.random() * pool.length);
+                setReiDaSelva(pool[randomIndex]);
+            }
+        };
+
+        updateRei();
+        const interval = setInterval(updateRei, 30000); // Rotate every 30 seconds
+        return () => clearInterval(interval);
+    }, [products, categories]);
 
     const fetchData = async () => {
         try {
@@ -110,26 +136,40 @@ const HomePage: React.FC = () => {
         return slug.includes('bebida') || name.includes('bebida') || name.includes('suco') || name.includes('refrigerante');
     });
 
-    const heroProduct = featuredProducts[0] || snacksProducts[0] || products[0];
+    const heroProduct = reiDaSelva || featuredProducts[0] || snacksProducts[0] || products[0];
+    const isRei = reiDaSelva && heroProduct.id === reiDaSelva.id;
 
     return (
         <div className="flex flex-col gap-6 py-4 px-4 bg-background-dark">
             {loading ? (
                 <div className="w-full h-[500px] bg-surface-dark rounded-2xl animate-pulse"></div>
             ) : heroProduct && (
-                <div className="w-full rounded-[32px] overflow-hidden relative min-h-[400px] flex items-end group shadow-2xl border border-white/5">
-                    <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" style={{ backgroundImage: `url("${heroProduct.image_url}")` }}></div>
+                <div className={`w-full rounded-[32px] overflow-hidden relative min-h-[400px] flex items-end group shadow-2xl border ${isRei ? 'border-yellow-500/30' : 'border-white/5'} transition-all duration-500`}>
+                    <div className="absolute inset-0 bg-cover bg-center transition-transform duration-[2000ms] group-hover:scale-110" style={{ backgroundImage: `url("${heroProduct.image_url}")` }}></div>
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
+
+                    {/* Premium Rei da Selva Glow */}
+                    {isRei && <div className="absolute inset-0 bg-yellow-500/5 animate-pulse pointer-events-none"></div>}
+
                     <div className="relative z-10 p-6 flex flex-col gap-4 w-full">
-                        <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/20 border border-primary/50 w-fit backdrop-blur-md">
-                            <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                            <span className="text-primary font-black text-[10px] uppercase tracking-wider">
-                                {heroProduct.is_featured ? 'Destaque' : 'Favorito'}
-                            </span>
+                        <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full w-fit backdrop-blur-md border ${isRei ? 'bg-yellow-500/20 border-yellow-500/50' : 'bg-primary/20 border-primary/50'}`}>
+                            {isRei ? (
+                                <>
+                                    <Icon name="crown" className="text-yellow-500 text-xs" />
+                                    <span className="text-yellow-500 font-black text-[10px] uppercase tracking-wider animate-bounce">Rei da Selva</span>
+                                </>
+                            ) : (
+                                <>
+                                    <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                                    <span className="text-primary font-black text-[10px] uppercase tracking-wider">
+                                        {heroProduct.is_featured ? 'Destaque' : 'Favorito'}
+                                    </span>
+                                </>
+                            )}
                         </span>
                         <div className="flex flex-col gap-1">
-                            <h1 className="text-white text-3xl md:text-5xl font-black leading-tight tracking-tighter italic">{heroProduct.name}</h1>
-                            <p className="text-gray-300 text-sm md:text-lg font-medium line-clamp-2">
+                            <h1 className="text-white text-3xl md:text-5xl font-black leading-tight tracking-tighter italic drop-shadow-lg">{heroProduct.name}</h1>
+                            <p className="text-gray-300 text-sm md:text-lg font-medium line-clamp-2 max-w-[80%]">
                                 {heroProduct.description}
                             </p>
                             <div className="mt-2 flex items-center justify-between">
@@ -143,9 +183,11 @@ const HomePage: React.FC = () => {
                                         <span className="text-2xl font-black text-primary">{formatPrice(heroProduct.price)}</span>
                                     )}
                                 </div>
-                                <Link to="/menu" className="bg-primary text-white p-3 rounded-2xl shadow-lg shadow-primary/20 hover:scale-105 transition-all">
-                                    <Icon name="add_shopping_cart" />
-                                </Link>
+                                {!isRei && (
+                                    <Link to="/menu" className="bg-primary text-white p-3 rounded-2xl shadow-lg shadow-primary/20 hover:scale-105 transition-all">
+                                        <Icon name="add_shopping_cart" />
+                                    </Link>
+                                )}
                             </div>
                         </div>
                     </div>
