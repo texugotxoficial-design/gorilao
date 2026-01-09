@@ -9,6 +9,10 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const port = process.env.PORT || 8080;
 
+app.get('/health', (req, res) => {
+    res.send('Server is alive!');
+});
+
 // Serve static files from the 'dist' directory
 app.use('/assets', express.static(path.join(__dirname, 'dist', 'assets'), {
     setHeaders: (res, filePath) => {
