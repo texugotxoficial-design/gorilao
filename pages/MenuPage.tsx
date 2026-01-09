@@ -27,6 +27,7 @@ interface Product {
     promo_price?: number | null;
     image_url: string;
     category_id: string;
+    is_available?: boolean;
     is_featured?: boolean;
     is_promotion?: boolean;
 }
@@ -41,6 +42,7 @@ const MenuPage: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
+    const [addedToast, setAddedToast] = useState<string | null>(null);
 
     useEffect(() => {
         fetchData();
@@ -76,17 +78,39 @@ const MenuPage: React.FC = () => {
     };
 
     const filteredProducts = products.filter(product => {
+        const isAvailable = product.is_available !== false;
         const matchesCategory = selectedCategory ? product.category_id === selectedCategory : true;
         const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             product.description.toLowerCase().includes(searchQuery.toLowerCase());
-        return matchesCategory && matchesSearch;
+        return isAvailable && matchesCategory && matchesSearch;
     });
+
+    const handleSelectProduct = (product: Product) => {
+        const productCategory = categories.find(c => c.id === product.category_id);
+        const categoryName = productCategory?.name.toLowerCase() || '';
+        const categorySlug = productCategory?.slug.toLowerCase() || '';
+        const isDrink = categoryName.includes('bebida') || categorySlug.includes('bebida') || categorySlug.includes('drink');
+        const hasExtras = extras.some(e => e.category === productCategory?.slug);
+
+        if (isDrink || !hasExtras) {
+            addToCart(product, []);
+            showAddedToast(product.name);
+        } else {
+            setSelectedProduct(product);
+        }
+    };
+
+    const showAddedToast = (name: string) => {
+        setAddedToast(name);
+        setTimeout(() => setAddedToast(null), 2000);
+    };
 
     const handleAddToCart = (product: Product) => {
         const selectedExtrasObjects = extras.filter(e => selectedExtras.includes(e.id));
         addToCart(product, selectedExtrasObjects);
         setSelectedProduct(null);
         setSelectedExtras([]);
+        showAddedToast(product.name);
     };
 
     const toggleExtra = (extraId: string) => {
@@ -101,6 +125,13 @@ const MenuPage: React.FC = () => {
 
     return (
         <div className="flex flex-col min-h-screen bg-background-dark pb-10">
+            {/* Added Toast */}
+            {addedToast && (
+                <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] bg-green-500 text-white px-6 py-3 rounded-2xl font-black shadow-2xl animate-in fade-in slide-in-from-top-4 duration-300">
+                    {addedToast} adicionado! 🦍🔥
+                </div>
+            )}
+
             {/* Sticky Category Bar - Mobile Optimized */}
             <div className="sticky top-[60px] lg:top-[64px] z-[80] bg-background-dark/95 backdrop-blur-md border-b border-border-dark py-3 px-4 overflow-x-auto no-scrollbar flex items-center gap-2">
                 <button
@@ -148,9 +179,13 @@ const MenuPage: React.FC = () => {
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         {filteredProducts.map(product => (
-                            <div key={product.id} className="bg-surface-dark rounded-[24px] border border-border-dark overflow-hidden flex flex-row h-32 hover:border-primary/30 transition-all active:scale-[0.98] group shadow-lg">
+                            <div
+                                key={product.id}
+                                onClick={() => handleSelectProduct(product)}
+                                className="bg-surface-dark rounded-[24px] border border-border-dark overflow-hidden flex flex-row h-32 hover:border-primary/50 transition-all active:scale-[0.98] cursor-pointer group shadow-lg relative"
+                            >
                                 <div className="w-32 h-full relative overflow-hidden shrink-0">
-                                    <img src={product.image_url} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                    <img src={product.image_url} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                     {product.is_featured && (
                                         <div className="absolute top-0 left-0 bg-yellow-500 text-black text-[8px] font-black px-2 py-0.5 rounded-br-lg uppercase tracking-tighter">
                                             Destaque
@@ -159,7 +194,7 @@ const MenuPage: React.FC = () => {
                                 </div>
                                 <div className="flex-grow p-3 flex flex-col justify-between overflow-hidden">
                                     <div>
-                                        <h3 className="font-bold text-sm leading-none truncate mb-1">{product.name}</h3>
+                                        <h3 className="font-bold text-sm leading-none truncate mb-1 group-hover:text-primary transition-colors">{product.name}</h3>
                                         <p className="text-gray-400 text-[10px] line-clamp-2 leading-tight">{product.description}</p>
                                     </div>
                                     <div className="flex items-center justify-between">
@@ -173,24 +208,9 @@ const MenuPage: React.FC = () => {
                                                 <span className="font-black text-primary text-base">{formatPrice(product.price)}</span>
                                             )}
                                         </div>
-                                        <button
-                                            onClick={() => {
-                                                const productCategory = categories.find(c => c.id === product.category_id);
-                                                const categoryName = productCategory?.name.toLowerCase() || '';
-                                                const categorySlug = productCategory?.slug.toLowerCase() || '';
-                                                const isDrink = categoryName.includes('bebida') || categorySlug.includes('bebida') || categorySlug.includes('drink');
-                                                const hasExtras = extras.some(e => e.category === productCategory?.slug);
-
-                                                if (isDrink || !hasExtras) {
-                                                    addToCart(product, []);
-                                                } else {
-                                                    setSelectedProduct(product);
-                                                }
-                                            }}
-                                            className="bg-primary text-white p-2 rounded-xl shadow-lg shadow-primary/20"
-                                        >
+                                        <div className="bg-primary/10 text-primary p-2 rounded-xl group-hover:bg-primary group-hover:text-white transition-all">
                                             <Icon name="add" className="text-xl" />
-                                        </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
