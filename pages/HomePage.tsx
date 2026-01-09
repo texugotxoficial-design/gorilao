@@ -155,7 +155,7 @@ const HomePage: React.FC = () => {
             {/* Categories Horizontal Scroll */}
             <section className="flex flex-col gap-4 lg:hidden">
                 <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-black italic uppercase tracking-tighter">Explorar</h3>
+                    <h3 className="text-xl font-black italic uppercase tracking-tighter text-white">Explorar</h3>
                     <Link to="/menu" className="text-xs font-bold text-primary">Ver todos</Link>
                 </div>
                 <div className="flex items-center gap-4 overflow-x-auto no-scrollbar pb-2">
@@ -177,7 +177,7 @@ const HomePage: React.FC = () => {
                         <div className="size-8 bg-yellow-500/10 rounded-xl flex items-center justify-center">
                             <Icon name="bolt" className="text-yellow-500 text-xl" />
                         </div>
-                        <h3 className="text-xl font-black italic uppercase tracking-tighter">Sugestões de Hoje</h3>
+                        <h3 className="text-xl font-black italic uppercase tracking-tighter text-white">Sugestões de Hoje</h3>
                     </div>
                     <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x pb-4">
                         {featuredProducts.map(fp => (
