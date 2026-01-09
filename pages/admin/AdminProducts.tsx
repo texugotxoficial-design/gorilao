@@ -167,9 +167,10 @@ const AdminProducts: React.FC = () => {
             setIsModalOpen(false);
             setImageFile(null);
             setImagePreview(null);
-        } catch (err) {
+        } catch (err: any) {
             console.error("Error saving product:", err);
-            alert("Erro ao salvar produto.");
+            const errorMessage = err.message || "Erro desconhecido";
+            alert(`Erro ao salvar produto: ${errorMessage}`);
         } finally {
             setUploading(false);
         }
@@ -316,20 +317,31 @@ const AdminProducts: React.FC = () => {
                                 <label className="flex flex-col gap-2">
                                     <span className="text-sm font-bold text-gray-400">Preço (BRL)</span>
                                     <input
-                                        type="number" step="0.01" required
+                                        type="text" required
+                                        placeholder="Ex: 26,99"
                                         className="bg-background-dark border border-border-dark rounded-xl p-3 focus:border-primary outline-none"
-                                        value={formData.price}
-                                        onChange={e => setFormData({ ...formData, price: Number(e.target.value) })}
+                                        value={formData.price !== undefined ? String(formData.price).replace('.', ',') : ''}
+                                        onChange={e => {
+                                            const val = e.target.value.replace(',', '.');
+                                            if (val === '' || !isNaN(Number(val))) {
+                                                setFormData({ ...formData, price: val === '' ? 0 : Number(val) });
+                                            }
+                                        }}
                                     />
                                 </label>
                                 <label className="flex flex-col gap-2">
                                     <span className="text-sm font-bold text-gray-400">Preço Promocional (Opcional)</span>
                                     <input
-                                        type="number" step="0.01"
+                                        type="text"
+                                        placeholder="Ex: 19,90"
                                         className="bg-background-dark border border-border-dark rounded-xl p-3 focus:border-primary outline-none"
-                                        value={formData.promo_price || ''}
-                                        onChange={e => setFormData({ ...formData, promo_price: e.target.value ? Number(e.target.value) : null })}
-                                        placeholder="Ex: 19.90"
+                                        value={formData.promo_price !== null && formData.promo_price !== undefined ? String(formData.promo_price).replace('.', ',') : ''}
+                                        onChange={e => {
+                                            const val = e.target.value.replace(',', '.');
+                                            if (val === '' || !isNaN(Number(val))) {
+                                                setFormData({ ...formData, promo_price: val === '' ? null : Number(val) });
+                                            }
+                                        }}
                                     />
                                 </label>
                             </div>
