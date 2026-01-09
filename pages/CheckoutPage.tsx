@@ -188,7 +188,7 @@ const CheckoutPage: React.FC = () => {
             setTimeout(() => {
                 clearCart();
                 window.location.href = whatsappUrl;
-            }, 100);
+            }, 1500); // Give 1.5s for the user to see the success message
         } catch (error) {
             console.error('Error placing order:', error);
             alert('Erro ao processar pedido. Tente novamente.');
@@ -196,6 +196,19 @@ const CheckoutPage: React.FC = () => {
             setLoading(false);
         }
     };
+
+    if (orderPlaced) {
+        return (
+            <div className="min-h-screen bg-background-dark flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-500">
+                <div className="size-24 bg-green-500 rounded-full flex items-center justify-center text-white mb-6 shadow-2xl shadow-green-500/20 animate-bounce">
+                    <Icon name="check" className="text-5xl" />
+                </div>
+                <h2 className="text-3xl font-black uppercase italic tracking-tighter mb-2">Pedido Confirmado!</h2>
+                <p className="text-gray-400 mb-8 max-w-[280px]">Estamos te levando para o WhatsApp para finalizar os detalhes.</p>
+                <div className="size-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col gap-6 p-4 bg-background-dark pb-24">

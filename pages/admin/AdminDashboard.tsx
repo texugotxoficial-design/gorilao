@@ -12,6 +12,7 @@ const AdminDashboard: React.FC = () => {
         orders: 0,
         revenue: 0
     });
+    const [recentOrders, setRecentOrders] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -31,10 +32,11 @@ const AdminDashboard: React.FC = () => {
 
     const fetchStats = async () => {
         try {
-            const [prodCount, catCount, orderData] = await Promise.all([
+            const [prodCount, catCount, orderData, recentData] = await Promise.all([
                 supabase.from('products').select('*', { count: 'exact', head: true }),
                 supabase.from('categories').select('*', { count: 'exact', head: true }),
-                supabase.from('orders').select('total_amount')
+                supabase.from('orders').select('total_amount'),
+                supabase.from('orders').select('*').order('created_at', { ascending: false }).limit(5)
             ]);
 
             const totalRevenue = orderData.data?.reduce((acc, curr) => acc + Number(curr.total_amount), 0) || 0;
@@ -45,6 +47,10 @@ const AdminDashboard: React.FC = () => {
                 orders: orderData.data?.length || 0,
                 revenue: totalRevenue
             });
+
+            if (recentData.data) {
+                setRecentOrders(recentData.data);
+            }
         } catch (err) {
             console.error("Error fetching stats:", err);
         } finally {
@@ -52,11 +58,15 @@ const AdminDashboard: React.FC = () => {
         }
     };
 
+    const formatPrice = (price: number) => {
+        return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price);
+    };
+
     const statCards = [
         { label: 'Produtos', value: stats.products, icon: 'lunch_dining', color: 'bg-blue-500/20 text-blue-500', link: '/admin/products' },
         { label: 'Categorias', value: stats.categories, icon: 'category', color: 'bg-purple-500/20 text-purple-500', link: '/admin/categories' },
         { label: 'Total Pedidos', value: stats.orders, icon: 'shopping_basket', color: 'bg-green-500/20 text-green-500', link: '/dashboard' },
-        { label: 'Receita Total', value: new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(stats.revenue), icon: 'payments', color: 'bg-yellow-500/20 text-yellow-500', link: '#' }
+        { label: 'Receita Total', value: formatPrice(stats.revenue), icon: 'payments', color: 'bg-yellow-500/20 text-yellow-500', link: '#' }
     ];
 
     return (
@@ -85,6 +95,50 @@ const AdminDashboard: React.FC = () => {
                         </Link>
                     ))}
                 </div>
+
+                {/* Real-time Order Feed */}
+                <section className="bg-surface-dark border border-border-dark p-8 rounded-[40px] shadow-2xl overflow-hidden relative group">
+                    <div className="absolute top-0 right-0 p-8 text-primary/5 group-hover:text-primary/10 transition-colors">
+                        <Icon name="rss_feed" className="text-9xl" />
+                    </div>
+
+                    <div className="flex justify-between items-center mb-8 relative z-10">
+                        <div className="flex items-center gap-3">
+                            <div className="size-3 bg-red-500 rounded-full animate-ping"></div>
+                            <h3 className="text-2xl font-black italic uppercase tracking-tighter">Fluxo de Pedidos em Tempo Real</h3>
+                        </div>
+                        <span className="text-[10px] font-black uppercase text-gray-500 tracking-[0.2em]">Live Feed</span>
+                    </div>
+
+                    <div className="flex flex-col gap-4 relative z-10">
+                        {recentOrders.length > 0 ? (
+                            recentOrders.map((order, idx) => (
+                                <div
+                                    key={order.id}
+                                    className={`flex items-center justify-between p-5 bg-background-dark/50 border border-border-dark rounded-2xl group/item hover:border-primary/30 transition-all animate-in slide-in-from-right-4 duration-500 delay-[${idx * 100}ms]`}
+                                >
+                                    <div className="flex items-center gap-4">
+                                        <div className="size-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary group-hover/item:scale-110 transition-transform">
+                                            <Icon name="shopping_bag" />
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="font-black text-sm uppercase tracking-tight">Pedido #{order.order_number}</span>
+                                            <span className="text-[10px] text-gray-500 font-bold">{new Date(order.created_at).toLocaleString('pt-BR')}</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-col items-end">
+                                        <span className="font-black text-primary">{formatPrice(order.total_amount)}</span>
+                                        <span className="text-[8px] font-black uppercase tracking-widest text-green-500 px-2 py-0.5 bg-green-500/10 rounded-full">{order.status}</span>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="py-10 text-center text-gray-500 font-medium italic">
+                                Aguardando o primeiro gorila fazer um pedido... 🦍
+                            </div>
+                        )}
+                    </div>
+                </section>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                     <section className="bg-surface-dark border border-border-dark p-8 rounded-3xl flex flex-col gap-6">
