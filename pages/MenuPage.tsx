@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import Icon from '../components/Icon';
 import { supabase } from '../lib/supabaseClient';
 import { useCart } from '../contexts/CartContext';
@@ -43,6 +43,8 @@ const MenuPage: React.FC = () => {
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
     const [addedToast, setAddedToast] = useState<string | null>(null);
+    const [searchParams] = useSearchParams();
+    const productIdParam = searchParams.get('productId');
 
     useEffect(() => {
         fetchData();
@@ -58,6 +60,19 @@ const MenuPage: React.FC = () => {
             supabase.removeChannel(channel);
         };
     }, []);
+
+    // Deep linking: Auto-open product modal if productId is in URL
+    useEffect(() => {
+        if (!loading && products.length > 0 && productIdParam) {
+            const product = products.find(p => p.id === productIdParam);
+            if (product && product.is_available !== false) {
+                // Wait a bit for the categories to be ready as well
+                if (categories.length > 0) {
+                    handleSelectProduct(product);
+                }
+            }
+        }
+    }, [loading, products, categories, productIdParam]);
 
     const fetchData = async () => {
         try {
@@ -89,10 +104,12 @@ const MenuPage: React.FC = () => {
         const productCategory = categories.find(c => c.id === product.category_id);
         const categoryName = productCategory?.name.toLowerCase() || '';
         const categorySlug = productCategory?.slug.toLowerCase() || '';
-        const isDrink = categoryName.includes('bebida') || categorySlug.includes('bebida') || categorySlug.includes('drink');
-        const hasExtras = extras.some(e => e.category === productCategory?.slug);
+        const isDrink = categoryName.includes('bebida') || categorySlug.includes('bebida') ||
+            categorySlug.includes('drink') || categorySlug.includes('refrigerante') ||
+            categorySlug.includes('suco');
 
-        if (isDrink || !hasExtras) {
+        // If it's a food item, always show the extras modal (user's request: "all categories except beverages")
+        if (isDrink) {
             addToCart(product, []);
             showAddedToast(product.name);
         } else {
@@ -256,8 +273,12 @@ const MenuPage: React.FC = () => {
                                 <div className="grid grid-cols-1 gap-2">
                                     {extras
                                         .filter(extra => {
-                                            const productCategory = categories.find(c => c.id === selectedProduct.category_id);
-                                            return extra.category === productCategory?.slug;
+                                            // Show all food extras for non-beverage categories
+                                            // Typically food extras are categorized as 'lanche', 'porcao', etc.
+                                            // We exclude beverage-specific extras (if any exist)
+                                            const isExtraForDrink = extra.category?.toLowerCase().includes('bebida') ||
+                                                extra.category?.toLowerCase().includes('drink');
+                                            return !isExtraForDrink;
                                         })
                                         .map(extra => (
                                             <button

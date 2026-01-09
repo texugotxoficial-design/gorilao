@@ -184,7 +184,7 @@ const HomePage: React.FC = () => {
                                     )}
                                 </div>
                                 {!isRei && (
-                                    <Link to="/menu" className="bg-primary text-white p-3 rounded-2xl shadow-lg shadow-primary/20 hover:scale-105 transition-all">
+                                    <Link to={`/menu?productId=${heroProduct.id}`} className="bg-primary text-white p-3 rounded-2xl shadow-lg shadow-primary/20 hover:scale-105 transition-all">
                                         <Icon name="add_shopping_cart" />
                                     </Link>
                                 )}
@@ -223,7 +223,7 @@ const HomePage: React.FC = () => {
                     </div>
                     <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x pb-4">
                         {featuredProducts.map(fp => (
-                            <Link key={fp.id} to="/menu" className="min-w-[280px] bg-surface-dark border border-border-dark rounded-[24px] overflow-hidden group snap-start shadow-xl">
+                            <Link key={fp.id} to={`/menu?productId=${fp.id}`} className="min-w-[280px] bg-surface-dark border border-border-dark rounded-[24px] overflow-hidden group snap-start shadow-xl">
                                 <div className="h-44 relative overflow-hidden">
                                     <img src={fp.image_url} alt={fp.name} className="w-full h-full object-cover group-hover:scale-110 transition-duration-700" />
                                     <div className="absolute top-3 right-3 bg-yellow-500 text-black text-[10px] font-black px-2 py-1 rounded-md uppercase tracking-tighter">
@@ -261,7 +261,7 @@ const HomePage: React.FC = () => {
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         {products.filter(p => p.is_promotion).slice(0, 4).map(promo => (
-                            <Link key={promo.id} to="/menu" className="bg-surface-dark rounded-2xl p-2 flex flex-col gap-2 group transition-all">
+                            <Link key={promo.id} to={`/menu?productId=${promo.id}`} className="bg-surface-dark rounded-2xl p-2 flex flex-col gap-2 group transition-all">
                                 <div className="aspect-square rounded-xl overflow-hidden relative">
                                     <img src={promo.image_url} alt={promo.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
                                 </div>
