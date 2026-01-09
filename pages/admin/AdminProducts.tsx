@@ -29,6 +29,7 @@ const AdminProducts: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
+    const [showPromosOnly, setShowPromosOnly] = useState(false);
 
     // Modal state
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -190,7 +191,8 @@ const AdminProducts: React.FC = () => {
     const filteredProducts = products.filter(p => {
         const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesCategory = selectedCategory === 'all' || p.category_id === selectedCategory;
-        return matchesSearch && matchesCategory;
+        const matchesPromo = !showPromosOnly || p.is_promotion;
+        return matchesSearch && matchesCategory && matchesPromo;
     });
 
     const formatPrice = (price: number) => {
@@ -234,6 +236,14 @@ const AdminProducts: React.FC = () => {
                             <option key={cat.id} value={cat.id}>{cat.name}</option>
                         ))}
                     </select>
+
+                    <button
+                        onClick={() => setShowPromosOnly(!showPromosOnly)}
+                        className={`flex items-center gap-2 px-4 py-3 rounded-xl border transition-all text-sm font-bold ${showPromosOnly ? 'bg-indigo-500/20 border-indigo-500 text-indigo-400' : 'bg-background-dark border-border-dark text-gray-400 hover:border-gray-600'}`}
+                    >
+                        <Icon name="local_offer" className={showPromosOnly ? 'text-indigo-400' : 'text-gray-500'} />
+                        {showPromosOnly ? 'Ver Todos' : 'Ver Promoções'}
+                    </button>
                 </div>
 
                 <div className="grid grid-cols-1 gap-4">
@@ -252,15 +262,28 @@ const AdminProducts: React.FC = () => {
                                         <div className="flex items-center gap-2 mb-1">
                                             <h3 className="font-black text-lg">{product.name}</h3>
                                             {product.is_featured && (
-                                                <span className="bg-yellow-500/10 text-yellow-500 text-[10px] font-black px-2 py-0.5 rounded uppercase">Hero</span>
+                                                <span className="bg-yellow-500/10 text-yellow-500 text-[10px] font-black px-2 py-0.5 rounded uppercase border border-yellow-500/20 flex items-center gap-1">
+                                                    <Icon name="star" className="text-[10px]" />
+                                                    Hero
+                                                </span>
                                             )}
                                             {product.is_promotion && (
-                                                <span className="bg-primary/10 text-primary text-[10px] font-black px-2 py-0.5 rounded uppercase">Promo</span>
+                                                <span className="bg-indigo-500/10 text-indigo-400 text-[10px] font-black px-2 py-0.5 rounded uppercase border border-indigo-500/20 flex items-center gap-1 shadow-lg shadow-indigo-500/10">
+                                                    <Icon name="local_offer" className="text-[10px]" />
+                                                    Promo
+                                                </span>
                                             )}
                                         </div>
                                         <p className="text-gray-500 text-xs line-clamp-1 max-w-sm">{product.description}</p>
                                         <div className="flex items-center gap-3 mt-2">
-                                            <span className="text-primary font-black">{formatPrice(product.price)}</span>
+                                            {product.is_promotion && product.promo_price ? (
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-indigo-400 font-black">{formatPrice(product.promo_price)}</span>
+                                                    <span className="text-gray-600 text-[10px] line-through opacity-50">{formatPrice(product.price)}</span>
+                                                </div>
+                                            ) : (
+                                                <span className="text-primary font-black">{formatPrice(product.price)}</span>
+                                            )}
                                             <span className="text-gray-600">•</span>
                                             <span className="text-xs text-gray-400">{categories.find(c => c.id === product.category_id)?.name}</span>
                                         </div>
