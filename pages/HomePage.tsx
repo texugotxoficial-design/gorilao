@@ -212,7 +212,7 @@ const HomePage: React.FC = () => {
 
             {/* Promotions */}
             {products.filter(p => p.is_promotion).length > 0 && (
-                <section className="flex flex-col gap-4 bg-primary/5 rounded-[32px] p-6 border border-primary/10">
+                <section className="flex flex-col gap-4 bg-[#2f1b1d] rounded-[32px] p-6 border border-primary/20">
                     <div className="flex items-center gap-3">
                         <Icon name="local_offer" className="text-primary" />
                         <h3 className="text-xl font-black italic uppercase tracking-tighter">Ofertas da Selva</h3>
