@@ -14,6 +14,7 @@ interface Product {
     name: string;
     description: string;
     price: number;
+    promo_price?: number | null;
     image_url: string;
     category_id: string;
     is_available?: boolean;
@@ -36,6 +37,7 @@ const AdminProducts: React.FC = () => {
         name: '',
         description: '',
         price: 0,
+        promo_price: null,
         image_url: '',
         category_id: '',
         is_available: true,
@@ -92,6 +94,7 @@ const AdminProducts: React.FC = () => {
                 name: '',
                 description: '',
                 price: 0,
+                promo_price: null,
                 image_url: '',
                 category_id: categories[0]?.id || '',
                 is_available: true,
@@ -317,6 +320,16 @@ const AdminProducts: React.FC = () => {
                                         className="bg-background-dark border border-border-dark rounded-xl p-3 focus:border-primary outline-none"
                                         value={formData.price}
                                         onChange={e => setFormData({ ...formData, price: Number(e.target.value) })}
+                                    />
+                                </label>
+                                <label className="flex flex-col gap-2">
+                                    <span className="text-sm font-bold text-gray-400">Preço Promocional (Opcional)</span>
+                                    <input
+                                        type="number" step="0.01"
+                                        className="bg-background-dark border border-border-dark rounded-xl p-3 focus:border-primary outline-none"
+                                        value={formData.promo_price || ''}
+                                        onChange={e => setFormData({ ...formData, promo_price: e.target.value ? Number(e.target.value) : null })}
+                                        placeholder="Ex: 19.90"
                                     />
                                 </label>
                             </div>

@@ -7,6 +7,8 @@ import { supabase } from '../../lib/supabaseClient';
 interface Product {
     id: string;
     name: string;
+    price: number;
+    promo_price: number | null;
     is_featured: boolean;
     is_showcase: boolean;
     is_promotion: boolean;
@@ -62,7 +64,7 @@ const AdminPromotions: React.FC = () => {
     const fetchData = async () => {
         try {
             const [prodRes, bannerRes] = await Promise.all([
-                supabase.from('products').select('id, name, is_featured, is_showcase, is_promotion, image_url'),
+                supabase.from('products').select('id, name, price, promo_price, is_featured, is_showcase, is_promotion, image_url'),
                 supabase.from('banners').select('*').order('created_at', { ascending: false })
             ]);
 

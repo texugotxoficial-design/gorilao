@@ -27,6 +27,7 @@ interface Product {
     name: string;
     description: string;
     price: number;
+    promo_price?: number | null;
     image_url: string;
     category_id: string;
     is_featured: boolean;
@@ -132,7 +133,16 @@ const HomePage: React.FC = () => {
                                 {heroProduct.description}
                             </p>
                             <div className="mt-2 flex items-center justify-between">
-                                <span className="text-2xl font-black text-primary">{formatPrice(heroProduct.price)}</span>
+                                <div className="flex flex-col">
+                                    {heroProduct.is_promotion && heroProduct.promo_price ? (
+                                        <>
+                                            <span className="text-sm text-gray-400 line-through leading-none">{formatPrice(heroProduct.price)}</span>
+                                            <span className="text-2xl font-black text-primary">{formatPrice(heroProduct.promo_price)}</span>
+                                        </>
+                                    ) : (
+                                        <span className="text-2xl font-black text-primary">{formatPrice(heroProduct.price)}</span>
+                                    )}
+                                </div>
                                 <Link to="/menu" className="bg-primary text-white p-3 rounded-2xl shadow-lg shadow-primary/20 hover:scale-105 transition-all">
                                     <Icon name="add_shopping_cart" />
                                 </Link>
@@ -181,7 +191,16 @@ const HomePage: React.FC = () => {
                                 <div className="p-4 flex flex-col gap-2">
                                     <div className="flex justify-between items-center">
                                         <h4 className="font-bold text-lg leading-tight truncate">{fp.name}</h4>
-                                        <span className="text-primary font-black">{formatPrice(fp.price)}</span>
+                                        <div className="flex flex-col items-end">
+                                            {fp.is_promotion && fp.promo_price ? (
+                                                <>
+                                                    <span className="text-[10px] text-gray-500 line-through leading-none">{formatPrice(fp.price)}</span>
+                                                    <span className="text-primary font-black">{formatPrice(fp.promo_price)}</span>
+                                                </>
+                                            ) : (
+                                                <span className="text-primary font-black">{formatPrice(fp.price)}</span>
+                                            )}
+                                        </div>
                                     </div>
                                     <p className="text-gray-400 text-xs line-clamp-2">{fp.description}</p>
                                 </div>
@@ -206,7 +225,16 @@ const HomePage: React.FC = () => {
                                 </div>
                                 <div className="flex flex-col px-1 pb-1">
                                     <span className="font-bold text-xs truncate">{promo.name}</span>
-                                    <span className="text-primary font-black text-sm">{formatPrice(promo.price)}</span>
+                                    <div className="flex flex-col">
+                                        {promo.promo_price ? (
+                                            <>
+                                                <span className="text-[10px] text-gray-500 line-through leading-none">{formatPrice(promo.price)}</span>
+                                                <span className="text-primary font-black text-sm">{formatPrice(promo.promo_price)}</span>
+                                            </>
+                                        ) : (
+                                            <span className="text-primary font-black text-sm">{formatPrice(promo.price)}</span>
+                                        )}
+                                    </div>
                                 </div>
                             </Link>
                         ))}

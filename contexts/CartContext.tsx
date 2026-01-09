@@ -37,6 +37,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const extras = selectedExtras.map((e: any) => ({ name: e.name, price: Number(e.price) }));
         const extrasTotal = extras.reduce((acc: number, curr: any) => acc + curr.price, 0);
 
+        // Use promo_price if on promotion, otherwise use regular price
+        const basePrice = (product.is_promotion && product.promo_price)
+            ? Number(product.promo_price)
+            : Number(product.price);
+
         // Create a unique key for the item based on ID and extras
         const extrasKey = extras.map((e: any) => e.name).sort().join('|');
         const itemId = `${product.id}-${extrasKey}`;
@@ -52,7 +57,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 id: itemId,
                 product_id: product.id,
                 name: product.name,
-                price: Number(product.price) + extrasTotal,
+                price: basePrice + extrasTotal,
                 quantity: 1,
                 image_url: product.image_url,
                 extras

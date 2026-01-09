@@ -24,9 +24,11 @@ interface Product {
     name: string;
     description: string;
     price: number;
+    promo_price?: number | null;
     image_url: string;
     category_id: string;
     is_featured?: boolean;
+    is_promotion?: boolean;
 }
 
 const MenuPage: React.FC = () => {
@@ -161,7 +163,16 @@ const MenuPage: React.FC = () => {
                                         <p className="text-gray-400 text-[10px] line-clamp-2 leading-tight">{product.description}</p>
                                     </div>
                                     <div className="flex items-center justify-between">
-                                        <span className="font-black text-primary text-base">{formatPrice(product.price)}</span>
+                                        <div className="flex flex-col">
+                                            {product.is_promotion && product.promo_price ? (
+                                                <>
+                                                    <span className="text-[10px] text-gray-500 line-through leading-none">{formatPrice(product.price)}</span>
+                                                    <span className="font-black text-primary text-base">{formatPrice(product.promo_price)}</span>
+                                                </>
+                                            ) : (
+                                                <span className="font-black text-primary text-base">{formatPrice(product.price)}</span>
+                                            )}
+                                        </div>
                                         <button
                                             onClick={() => {
                                                 const productCategory = categories.find(c => c.id === product.category_id);
@@ -254,7 +265,7 @@ const MenuPage: React.FC = () => {
                                 className="w-full flex items-center justify-between px-6 rounded-2xl h-14 bg-primary text-white font-black text-lg shadow-xl shadow-primary/20 transition-all active:scale-95"
                             >
                                 <span>Adicionar</span>
-                                <span>{formatPrice(selectedProduct.price + extras.filter(e => selectedExtras.includes(e.id)).reduce((acc, curr) => acc + Number(curr.price), 0))}</span>
+                                <span>{formatPrice((selectedProduct.is_promotion && selectedProduct.promo_price ? selectedProduct.promo_price : selectedProduct.price) + extras.filter(e => selectedExtras.includes(e.id)).reduce((acc, curr) => acc + Number(curr.price), 0))}</span>
                             </button>
                         </div>
                     </div>
