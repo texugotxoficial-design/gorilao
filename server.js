@@ -10,6 +10,13 @@ const app = express();
 const port = process.env.PORT || 8080;
 
 // Serve static files from the 'dist' directory
+app.use('/assets', express.static(path.join(__dirname, 'dist', 'assets'), {
+    setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.js')) {
+            res.setHeader('Content-Type', 'application/javascript');
+        }
+    }
+}));
 app.use(express.static(path.join(__dirname, 'dist')));
 
 // Handle React routing, return all requests to React app
