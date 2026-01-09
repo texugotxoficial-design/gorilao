@@ -11,19 +11,19 @@ const ContactPage: React.FC = () => {
         {
             icon: 'location_on',
             title: 'Onde Estamos',
-            details: 'Av. Saudade, 1234 - Campos Elíseos',
-            sub: 'Ribeirão Preto - SP'
+            details: 'Rua 8 bairro samarino',
+            sub: 'Miguelopolis - SP'
         },
         {
             icon: 'call',
             title: 'WhatsApp / Telefone',
-            details: '(16) 99112-2177',
+            details: '(16) 99050-8328',
             sub: 'Atendimento das 18h às 23h59'
         },
         {
             icon: 'schedule',
             title: 'Horário de Funcionamento',
-            details: 'Terça a Domingo',
+            details: 'Segunda a Domingo',
             sub: '18:00h às 23:59h'
         },
         {
@@ -59,7 +59,7 @@ const ContactPage: React.FC = () => {
 
                 <div className="flex flex-col gap-4">
                     <a
-                        href="https://wa.me/5516991122177"
+                        href="https://wa.me/5516990508328"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="w-full bg-[#25D366] text-white py-5 rounded-[24px] font-black text-xl flex items-center justify-center gap-3 shadow-2xl shadow-[#25D366]/20 transition-all active:scale-95"
@@ -71,7 +71,7 @@ const ContactPage: React.FC = () => {
 
                 <div className="relative rounded-[40px] overflow-hidden border border-border-dark shadow-2xl">
                     <img
-                        src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=1000"
+                        src="https://images.unsplash.com/photo-15550669314365d14bab8c?auto=format&fit=crop&q=80&w=1000"
                         alt="Restaurante"
                         className="w-full h-64 object-cover grayscale opacity-50"
                     />
