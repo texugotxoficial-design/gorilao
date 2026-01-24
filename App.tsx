@@ -7,8 +7,7 @@ import DashboardPage from './pages/DashboardPage';
 import MenuPage from './pages/MenuPage';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
-import ContactPage from './pages/ContactPage'; // Added import
-import RegisterPage from './pages/RegisterPage';
+import ContactPage from './pages/ContactPage';
 import ProfilePage from './pages/ProfilePage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProducts from './pages/admin/AdminProducts';
@@ -28,7 +27,6 @@ const App: React.FC = () => {
                 <HashRouter>
                     <Routes>
                         <Route path="/login" element={<LoginPage />} />
-                        <Route path="/register" element={<RegisterPage />} />
 
                         <Route path="/home" element={<MainLayout><HomePage /></MainLayout>} />
                         <Route path="/dashboard" element={

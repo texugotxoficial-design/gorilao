@@ -96,7 +96,6 @@ const LoginPage: React.FC = () => {
                     <div className="flex flex-col gap-2">
                         <div className="flex justify-between items-center px-1">
                             <span className="text-gray-500 text-[11px] font-black uppercase tracking-widest">Senha</span>
-                            <Link className="text-[11px] font-black uppercase tracking-widest text-primary hover:opacity-80 transition-opacity" to="/register">Esqueceu?</Link>
                         </div>
                         <div className="relative group">
                             <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-700 group-focus-within:text-primary transition-colors">
@@ -132,12 +131,6 @@ const LoginPage: React.FC = () => {
                         )}
                     </button>
 
-                    <div className="mt-6 text-center">
-                        <p className="text-gray-500 text-[13px] font-bold">
-                            Ainda não tem conta?{' '}
-                            <Link className="text-primary hover:underline font-black" to="/register">Cadastre-se agora</Link>
-                        </p>
-                    </div>
                 </form>
             </div>
         </div>
