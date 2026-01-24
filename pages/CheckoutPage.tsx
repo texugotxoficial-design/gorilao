@@ -9,7 +9,7 @@ const formatPrice = (price: number) => {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price);
 };
 
-console.log('GORILAO_APP_V: 1.1.8');
+console.log('GORILAO_APP_V: 1.1.9');
 
 const CheckoutPage: React.FC = () => {
     const { cartItems, clearCart } = useCart();

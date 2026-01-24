@@ -14,14 +14,9 @@ app.get('/health', (req, res) => {
 });
 
 // Serve static files from the 'dist' directory
-app.use('/assets', express.static(path.join(__dirname, 'dist', 'assets'), {
-    setHeaders: (res, filePath) => {
-        if (filePath.endsWith('.js')) {
-            res.setHeader('Content-Type', 'application/javascript');
-        }
-    }
-}));
 app.use(express.static(path.join(__dirname, 'dist')));
+// Also serve from root as fallback (for synced assets/index.html)
+app.use(express.static(__dirname));
 
 // Handle React routing, return all requests to React app
 app.use((req, res) => {
