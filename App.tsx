@@ -57,7 +57,7 @@ const App: React.FC = () => {
                             </AdminRoute>
                         } />
 
-                        <Route path="*" element={<Navigate to="/home" replace />} />
+                        <Route path="*" element={<Navigate to="/login" replace />} />
                     </Routes>
                 </HashRouter>
             </CartProvider>

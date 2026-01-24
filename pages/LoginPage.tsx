@@ -131,6 +131,14 @@ const LoginPage: React.FC = () => {
                         )}
                     </button>
 
+                    <Link
+                        to="/home"
+                        className="mt-4 w-full h-14 bg-surface-dark border border-border-dark text-gray-400 rounded-[20px] font-bold text-sm hover:text-white hover:border-gray-500 transition-all duration-300 flex items-center justify-center gap-2 group"
+                    >
+                        <Icon name="visibility" className="text-gray-600 group-hover:text-primary transition-colors" />
+                        Apenas espiar o cardápio
+                    </Link>
+
                 </form>
             </div>
         </div>
