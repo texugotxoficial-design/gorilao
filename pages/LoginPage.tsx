@@ -133,10 +133,10 @@ const LoginPage: React.FC = () => {
 
                     <Link
                         to="/home"
-                        className="mt-4 w-full h-14 bg-surface-dark border border-border-dark text-gray-400 rounded-[20px] font-bold text-sm hover:text-white hover:border-gray-500 transition-all duration-300 flex items-center justify-center gap-2 group"
+                        className="mt-4 w-full h-14 bg-surface-dark border-2 border-primary/40 text-primary-light rounded-[20px] font-black text-sm uppercase tracking-wider hover:bg-primary/5 hover:border-primary transition-all duration-300 flex items-center justify-center gap-3 group shadow-lg shadow-primary/5"
                     >
-                        <Icon name="visibility" className="text-gray-600 group-hover:text-primary transition-colors" />
-                        Apenas espiar o cardápio
+                        <Icon name="restaurant" className="text-primary group-hover:scale-110 transition-transform" />
+                        Entrar como Convidado
                     </Link>
 
                 </form>
