@@ -30,11 +30,7 @@ const App: React.FC = () => {
                         <Route path="/login" element={<LoginPage />} />
                         <Route path="/register" element={<RegisterPage />} />
 
-                        <Route path="/home" element={
-                            <ProtectedRoute>
-                                <MainLayout><HomePage /></MainLayout>
-                            </ProtectedRoute>
-                        } />
+                        <Route path="/home" element={<MainLayout><HomePage /></MainLayout>} />
                         <Route path="/dashboard" element={
                             <ProtectedRoute>
                                 <MainLayout><DashboardPage /></MainLayout>
@@ -45,17 +41,9 @@ const App: React.FC = () => {
                                 <MainLayout><ProfilePage /></MainLayout>
                             </ProtectedRoute>
                         } />
-                        <Route path="/menu" element={
-                            <ProtectedRoute>
-                                <MainLayout><MenuPage /></MainLayout>
-                            </ProtectedRoute>
-                        } />
-                        <Route path="/cart" element={
-                            <ProtectedRoute>
-                                <MainLayout><CartPage /></MainLayout>
-                            </ProtectedRoute>
-                        } />
-                        <Route path="/checkout" element={<ProtectedRoute><MainLayout><CheckoutPage /></MainLayout></ProtectedRoute>} />
+                        <Route path="/menu" element={<MainLayout><MenuPage /></MainLayout>} />
+                        <Route path="/cart" element={<MainLayout><CartPage /></MainLayout>} />
+                        <Route path="/checkout" element={<MainLayout><CheckoutPage /></MainLayout>} />
                         <Route path="/contact" element={<MainLayout><ContactPage /></MainLayout>} />
 
                         {/* Admin Routes */}
@@ -71,7 +59,7 @@ const App: React.FC = () => {
                             </AdminRoute>
                         } />
 
-                        <Route path="*" element={<Navigate to="/login" replace />} />
+                        <Route path="*" element={<Navigate to="/home" replace />} />
                     </Routes>
                 </HashRouter>
             </CartProvider>

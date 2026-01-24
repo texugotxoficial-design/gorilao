@@ -2,9 +2,11 @@ import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import Icon from './Icon';
 import { useCart } from '../contexts/CartContext';
+import { useAuth } from '../contexts/AuthContext';
 
 const MobileNav: React.FC = () => {
     const { cartItems } = useCart();
+    const { user } = useAuth();
     const location = useLocation();
 
     const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
@@ -13,8 +15,10 @@ const MobileNav: React.FC = () => {
         { path: '/home', icon: 'home', label: 'Início' },
         { path: '/menu', icon: 'restaurant', label: 'Cardápio' },
         { path: '/cart', icon: 'shopping_cart', label: 'Carrinho', isCart: true },
-        { path: '/dashboard', icon: 'receipt_long', label: 'Pedidos' },
-        { path: '/profile', icon: 'person', label: 'Perfil' },
+        ...(user ? [
+            { path: '/dashboard', icon: 'receipt_long', label: 'Pedidos' },
+            { path: '/profile', icon: 'person', label: 'Perfil' }
+        ] : []),
     ];
 
     // Don't show on login/register

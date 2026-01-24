@@ -41,7 +41,10 @@ const CheckoutPage: React.FC = () => {
         setSubtotal(total);
 
         const fetchProfile = async () => {
-            if (!user) return;
+            if (!user) {
+                setLoading(false);
+                return;
+            }
             const { data } = await supabase
                 .from('profiles')
                 .select('address, reference_point, full_name, phone')
@@ -129,13 +132,15 @@ const CheckoutPage: React.FC = () => {
             if (orderError) throw orderError;
 
             // Update user profile with latest delivery info
-            await supabase.from('profiles').upsert({
-                id: user?.id,
-                full_name: customerName,
-                phone: customerPhone,
-                address: fullAddress,
-                reference_point: referencePoint
-            });
+            if (user) {
+                await supabase.from('profiles').upsert({
+                    id: user?.id,
+                    full_name: customerName,
+                    phone: customerPhone,
+                    address: fullAddress,
+                    reference_point: referencePoint
+                });
+            }
 
             // Payment text for WhatsApp
             let paymentText = paymentMethod.toUpperCase();

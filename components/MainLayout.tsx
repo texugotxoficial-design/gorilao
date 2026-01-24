@@ -3,11 +3,14 @@ import MobileNav from './MobileNav';
 import { Link } from 'react-router-dom';
 import Icon from './Icon';
 
+import { useAuth } from '../contexts/AuthContext';
+
 interface MainLayoutProps {
     children: React.ReactNode;
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+    const { user } = useAuth();
     return (
         <div className="flex flex-col min-h-screen bg-background-dark text-white font-display antialiased pb-20 lg:pb-0">
             {/* Minimal Header for Mobile, Hidden on Desktop */}
@@ -32,9 +35,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     </Link>
                     <nav className="flex items-center gap-8">
                         <Link to="/menu" className="text-sm font-bold hover:text-primary transition-colors flex items-center gap-2">Cardápio</Link>
-                        <Link to="/dashboard" className="text-sm font-bold hover:text-primary transition-colors flex items-center gap-2">Pedidos</Link>
                         <Link to="/contact" className="text-sm font-bold hover:text-primary transition-colors flex items-center gap-2">Contato</Link>
-                        <Link to="/profile" className="text-sm font-bold hover:text-primary transition-colors flex items-center gap-2">Perfil</Link>
+                        {user && (
+                            <>
+                                <Link to="/dashboard" className="text-sm font-bold hover:text-primary transition-colors flex items-center gap-2">Pedidos</Link>
+                                <Link to="/profile" className="text-sm font-bold hover:text-primary transition-colors flex items-center gap-2">Perfil</Link>
+                            </>
+                        )}
                     </nav>
                 </div>
             </header>
