@@ -187,7 +187,7 @@ const CheckoutPage: React.FC = () => {
                 `_Aguarde a confirmação da nossa equipe._`
             ].join('\n');
 
-            const whatsappUrl = `https://wa.me/5516999718632?text=${encodeURIComponent(message)}`;
+            const whatsappUrl = `https://wa.me/5516990508328?text=${encodeURIComponent(message)}`;
 
             setOrderPlaced(true);
             setTimeout(() => {
