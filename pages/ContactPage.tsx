@@ -17,7 +17,7 @@ const ContactPage: React.FC = () => {
         {
             icon: 'call',
             title: 'WhatsApp / Telefone',
-            details: '(16) 99050-8328',
+            details: '(16) 99971-8632',
             sub: 'Atendimento das 18h às 23h59'
         },
         {
@@ -59,7 +59,7 @@ const ContactPage: React.FC = () => {
 
                 <div className="flex flex-col gap-4">
                     <a
-                        href="https://wa.me/5516990508328"
+                        href="https://wa.me/5516999718632"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="w-full bg-[#25D366] text-white py-5 rounded-[24px] font-black text-xl flex items-center justify-center gap-3 shadow-2xl shadow-[#25D366]/20 transition-all active:scale-95"
