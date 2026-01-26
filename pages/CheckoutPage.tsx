@@ -344,7 +344,7 @@ const CheckoutPage: React.FC = () => {
                                 </div>
                                 <div className="bg-surface-dark rounded-2xl border border-border-dark p-4">
                                     <span className="text-[8px] font-black uppercase tracking-widest text-gray-500 block mb-1">Copia e Cola / Chave</span>
-                                    <p className="font-bold text-white text-sm select-all">16990508328</p>
+                                    <p className="font-bold text-white text-sm select-all">16999718632</p>
                                 </div>
                                 <p className="text-[10px] font-medium text-gray-400 leading-relaxed">
                                     <span className="text-yellow-500">⚠️ Importante:</span> Após o pagamento, você será redirecionado ao WhatsApp. Por favor, <span className="text-white font-bold uppercase underline">envie o comprovante</span> para iniciarmos seu pedido.
